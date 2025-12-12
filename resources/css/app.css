@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Poppins Font */
+* {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+/* Preserve Font Awesome icons */
+.fas, .far, .fab, .fa, [class*="fa-"] {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+}
+
+/* Sidebar positioning and spacing improvements */
+#sidebar {
+    transform: translateX(0) !important;
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    left: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.sidebar-link {
+    padding: 0.75rem 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+    border-radius: 0.5rem !important;
+}
+
+#dataSubMenu,
+#operasionalSubMenu {
+    margin-left: 0.5rem !important;
+}
+
+#dataSubMenu .sidebar-link,
+#operasionalSubMenu .sidebar-link {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Main content adjustment for wider sidebar */
+#main-content {
+    margin-left: 300px !important;
+}
+
+/* Submenu functionality */
+#dataSubMenu,
+#operasionalSubMenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+#dataSubMenu.show,
+#operasionalSubMenu.show {
+    max-height: 200px;
+}
+
+/* Rotate chevron icon */
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Increase spacing between text and arrow icons */
+#dataMenuButton .flex.items-center.justify-between,
+#operasionalMenuButton .flex.items-center.justify-between {
+    gap: 1rem !important;
+}
+
+#dataMenuButton .flex.items-center.gap-3,
+#operasionalMenuButton .flex.items-center.gap-3 {
+    gap: 0.75rem !important;
+}
+
+/* Preserve ASTERA logo styling */
+.sidebar-logo {
+    font-family: 'Stretch Pro', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s ease;
+}
+
+/* Preserve ASTERA header styling */
+.astera-header {
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 1.25rem !important;
+    letter-spacing: 0.05em !important;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--astera-primary), var(--astera-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Stretch Pro Font Styling */
+.sidebar-logo:hover {
+    transform: scale(1.05);
+    text-shadow: 0 2px 4px rgba(74, 134, 146, 0.3);
+}
+
+.astera-header:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+    text-shadow: 0 2px 4px rgba(74, 134, 146, 0.3);
+}
+
+/* Utility classes for Stretch Pro font */
+.font-stretch {
+    font-family: 'Stretch Pro', sans-serif !important;
+}
+
+.font-stretch-bold {
+    font-family: 'Stretch Pro', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+.font-stretch-uppercase {
+    font-family: 'Stretch Pro', sans-serif !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* ASTERA Brand Colors */
+:root {
+    --astera-primary: #4A8692;
+    --astera-secondary: #2196b6;
+    --astera-accent: #58C1D1;
+    --astera-dark: #2c5a67;
+    --astera-light: #eaf6ff;
+}
+
+/* Enhanced ASTERA branding */
+.astera-brand {
+    font-family: 'Stretch Pro', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    background: linear-gradient(135deg, var(--astera-primary), var(--astera-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+}
+
+.astera-brand:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Dashboard and page title styling */
+.dashboard-title {
+    font-family: 'Stretch Pro', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    color: var(--astera-primary);
+}
+
+.page-title {
+    font-family: 'Stretch Pro', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    color: var(--astera-dark);
+}
+
+/* Enhanced sidebar styling */
+.sidebar-logo {
+    background: linear-gradient(135deg, var(--astera-primary), var(--astera-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom styles for profile settings */
+.profile-settings-modal {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Custom scrollbar for modal */
+.modal-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Focus states for form inputs */
+.form-input:focus {
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Button hover effects */
+.btn-hover {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

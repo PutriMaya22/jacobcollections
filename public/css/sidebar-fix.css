@@ -1,0 +1,126 @@
+/* Sidebar Fix CSS - Force Override untuk memastikan semua elemen tidak keluar dari sidebar */
+
+/* Force Override untuk Sidebar Container */
+aside#sidebar.sidebar.fixed.top-0.left-0.h-full.z-30.bg-white.transition-transform.duration-300.ease-in-out.translate-x-0.w-\[320px\].rounded-r-2xl.flex.flex-col.justify-between.pt-8,
+#sidebar,
+.sidebar {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Force Override untuk Main Content */
+div#main-content.flex-1.transition-all.duration-300.ease-in-out.ml-\[320px\].pt-8.px-8,
+#main-content {
+    margin-left: 320px !important;
+    margin-left: 320px !important;
+}
+
+/* Force Override untuk Sidebar Padding */
+#sidebar > div:first-child,
+#sidebar > div:last-child,
+#sidebar .flex.flex-col.items-center.w-full.px-6,
+#sidebar .w-full.px-6.mb-6.space-y-3 {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}
+
+/* Force Override untuk Sidebar Links */
+#sidebar .sidebar-link,
+.sidebar-link {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+#sidebar .sidebar-link i,
+.sidebar-link i {
+    flex-shrink: 0 !important;
+    min-width: auto !important;
+}
+
+#sidebar .sidebar-link span,
+.sidebar-link span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+/* Force Override untuk Profile Summary */
+#sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg,
+#sidebar div[class*="flex items-center gap-3 p-4 bg-gray-50 rounded-lg"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 16px !important;
+}
+
+#sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg img,
+#sidebar div[class*="flex items-center gap-3 p-4 bg-gray-50 rounded-lg"] img {
+    flex-shrink: 0 !important;
+    min-width: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+#sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg .flex-1,
+#sidebar div[class*="flex items-center gap-3 p-4 bg-gray-50 rounded-lg"] .flex-1 {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    flex: 1 !important;
+}
+
+#sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg .flex-shrink-0,
+#sidebar div[class*="flex items-center gap-3 p-4 bg-gray-50 rounded-lg"] .flex-shrink-0 {
+    flex-shrink: 0 !important;
+    min-width: auto !important;
+}
+
+/* Force Override untuk Notification Bell */
+#sidebar .relative button#notificationBell,
+#sidebar .relative button[id*="notificationBell"] {
+    padding: 8px !important;
+    min-width: auto !important;
+    flex-shrink: 0 !important;
+}
+
+/* Force Override untuk Logout Button */
+#sidebar form[method="POST"][action*="logout"] button[type="submit"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Responsive Override */
+@media (max-width: 767px) {
+    #sidebar,
+    .sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    #main-content {
+        margin-left: 0 !important;
+    }
+}
+
+/* Debug Styles - Hapus setelah testing */
+#sidebar::before {
+    content: "SIDEBAR WIDTH: 320px" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    background: red !important;
+    color: white !important;
+    padding: 4px !important;
+    font-size: 10px !important;
+    z-index: 9999 !important;
+}
