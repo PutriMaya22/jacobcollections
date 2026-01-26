@@ -9,12 +9,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BarangController;
-use App\Http\Controllers\BarangMasukController;
-use App\Http\Controllers\BarangKeluarController;
-use App\Http\Controllers\PemeliharaanController;
-use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\PredictController;
+
 
 /* ================= HALAMAN AWAL ================= */
 Route::get('/', function () {
@@ -74,41 +72,12 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-/* ================= OPERASIONAL ================= */
-Route::prefix('operasional')->middleware(['auth', 'admin_or_user_operasional'])->group(function () {
+// Menampilkan form
+Route::get('/prediksi', [PredictController::class, 'index'])->name('prediksi.index');
 
-    /* ===== BARANG MASUK ===== */
-    Route::get('/barang-masuk', [BarangMasukController::class, 'index'])->name('barang_masuk.index');
-    Route::post('/barang-masuk', [BarangMasukController::class, 'store'])->name('barang_masuk.store');
-    Route::delete('/barang-masuk/{id}', [BarangMasukController::class, 'destroy'])->name('barang_masuk.destroy');
+// Proses form POST
+Route::post('/prediksi', [PredictController::class, 'proses'])->name('prediksi.proses');
 
-    /* ===== BARANG KELUAR ===== */
-    Route::get('/barang-keluar', [BarangKeluarController::class, 'index'])->name('barang_keluar.index');
-    Route::post('/barang-keluar', [BarangKeluarController::class, 'store'])->name('barang_keluar.store');
-    Route::delete('/barang-keluar/{id}', [BarangKeluarController::class, 'destroy'])->name('barang_keluar.destroy');
-    Route::get('/barang-keluar/get-barang/{ruanganId}', [BarangKeluarController::class, 'getBarangByRuangan'])
-        ->name('barang_keluar.get_barang');
-
-    /* ===== PEMELIHARAAN ===== */
-    Route::get('/pemeliharaan', [PemeliharaanController::class, 'index'])->name('pemeliharaan.index');
-    Route::get('/pemeliharaan/create', [PemeliharaanController::class, 'create'])->name('pemeliharaan.create');
-    Route::post('/pemeliharaan', [PemeliharaanController::class, 'store'])->name('pemeliharaan.store');
-    Route::get('/pemeliharaan/{pemeliharaan}/edit', [PemeliharaanController::class, 'edit'])->name('pemeliharaan.edit');
-    Route::put('/pemeliharaan/{pemeliharaan}', [PemeliharaanController::class, 'update'])->name('pemeliharaan.update');
-    Route::delete('/pemeliharaan/{pemeliharaan}', [PemeliharaanController::class, 'destroy'])->name('pemeliharaan.destroy');
-    Route::get('/pemeliharaan/get-barang/{ruanganId}', [PemeliharaanController::class, 'getBarangByRuangan'])
-        ->name('pemeliharaan.get_barang');
-
-    /* ===== PEMINJAMAN ===== */
-    Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
-    Route::get('/peminjaman/create', [PeminjamanController::class, 'create'])->name('peminjaman.create');
-    Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-    Route::post('/peminjaman/{id}/kembali', [PeminjamanController::class, 'kembali'])->name('peminjaman.kembali');
-    Route::delete('/peminjaman/{peminjaman}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
-    Route::get('/peminjaman/get-barang/{ruanganId}', [PeminjamanController::class, 'getBarangByRuangan'])
-        ->name('peminjaman.get_barang');
-
-});
 
 /* ================= API NOTIFICATIONS ================= */
 Route::middleware(['auth'])->prefix('api')->group(function () {

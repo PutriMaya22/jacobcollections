@@ -249,8 +249,8 @@
                                        
                     @if(auth()->user()->isAdmin())
                     <!-- User Management (hanya untuk admin) -->
-                    <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                        <i class="fas fa-users"></i> User Management
+                    <a href="{{ route('prediksi.proses') }}" class="sidebar-link {{ request()->routeIs('predikdi.*') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i> Prediction
                     </a>
                     @endif
                 </nav>
