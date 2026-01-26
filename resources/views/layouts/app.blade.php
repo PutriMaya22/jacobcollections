@@ -245,34 +245,8 @@
                         </div>
                     </div>
                     @endif
-                    
-                    @if(auth()->user()->isAdmin() || auth()->user()->isUserOperasional())
-                    <!-- Operasional -->
-                    <div class="mb-2">
-                        <button id="operasionalMenuButton" class="sidebar-link w-full text-left {{ request()->routeIs('barang_keluar.*', 'pemeliharaan.*', 'peminjaman.*') ? 'active' : '' }}">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Operasional</span>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="operasionalMenuIcon"></i>
-                            </div>
-                        </button>
-                        
-                        <div id="operasionalSubMenu" class="{{ request()->routeIs('barang_keluar.*', 'pemeliharaan.*', 'peminjaman.*') ? 'show' : '' }}">
-                            <a href="{{ route('barang_keluar.index') }}" class="sidebar-link text-sm {{ request()->routeIs('barang_keluar.*') ? 'active' : '' }}">
-                                <i class="fas fa-arrow-up"></i> Barang Keluar
-                            </a>
-                            <a href="{{ route('pemeliharaan.index') }}" class="sidebar-link text-sm {{ request()->routeIs('pemeliharaan.*') ? 'active' : '' }}">
-                                <i class="fas fa-tools"></i> Pemeliharaan
-                            </a>
-                            <a href="{{ route('peminjaman.index') }}" class="sidebar-link text-sm {{ request()->routeIs('peminjaman.*') ? 'active' : '' }}">
-                                <i class="fas fa-hand-holding"></i> Peminjaman
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-                    
+                
+                                       
                     @if(auth()->user()->isAdmin())
                     <!-- User Management (hanya untuk admin) -->
                     <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
