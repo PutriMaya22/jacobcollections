@@ -6,15 +6,16 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminOrUserMiddleware
+class AdminOrOwnerMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || (!auth()->user()->isAdmin() && !auth()->user()->isUser())) {
+        if (!auth()->check() || 
+            (!auth()->user()->isAdmin() && !auth()->user()->isOwner())) {
+
             abort(403, 'Unauthorized action.');
         }
 
         return $next($request);
     }
 }
-

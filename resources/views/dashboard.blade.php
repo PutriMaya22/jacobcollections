@@ -6,34 +6,26 @@
 
 <!-- ================= CARD STATISTIK ================= -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
     <div class="bg-white rounded-xl shadow p-6">
         <p class="text-gray-500">Total Barang</p>
         <h3 class="text-2xl font-bold">{{ $totalBarang }}</h3>
     </div>
-
     <div class="bg-white rounded-xl shadow p-6">
         <p class="text-gray-500">Total Kategori</p>
         <h3 class="text-2xl font-bold">{{ $totalKategori }}</h3>
     </div>
-
     <div class="bg-white rounded-xl shadow p-6">
         <p class="text-gray-500">Total Penjualan</p>
-        <h3 class="text-2xl font-bold">
-            Rp {{ number_format($totalPenjualan, 0, ',', '.') }}
-        </h3>
+        <h3 class="text-2xl font-bold">Rp {{ number_format($totalPenjualan, 0, ',', '.') }}</h3>
     </div>
-
     <div class="bg-white rounded-xl shadow p-6">
         <p class="text-gray-500">Total Pesanan</p>
         <h3 class="text-2xl font-bold">{{ $totalPesanan }}</h3>
     </div>
-
 </div>
 
 <!-- ================= GRAFIK ================= -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
     <!-- Barang per Kategori -->
     <div class="bg-white rounded-xl shadow p-6">
         <h3 class="text-lg font-semibold mb-4">Jumlah Barang per Kategori</h3>
@@ -49,13 +41,11 @@
             <canvas id="penjualanTanggalChart"></canvas>
         </div>
     </div>
-
 </div>
 
 <!-- ================= TABEL PENJUALAN TERBARU ================= -->
-<div class="bg-white rounded-xl shadow p-6">
+<div class="bg-white rounded-xl shadow p-6 mb-6">
     <h3 class="text-lg font-semibold mb-4">Penjualan Terbaru</h3>
-
     <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
             <thead>
@@ -70,21 +60,25 @@
                 @forelse($recentPenjualan as $p)
                 <tr>
                     <td class="py-2">{{ date('d M Y', strtotime($p->tanggal)) }}</td>
-                    <td class="py-2">
-                        Rp {{ number_format($p->total_penjualan, 0, ',', '.') }}
-                    </td>
+                    <td class="py-2">Rp {{ number_format($p->total_penjualan, 0, ',', '.') }}</td>
                     <td class="py-2">{{ $p->total_pesanan }}</td>
                     <td class="py-2">{{ $p->penjualan_perpesanan }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="text-center text-gray-500 py-4">
-                        Belum ada data penjualan
-                    </td>
+                    <td colspan="4" class="text-center text-gray-500 py-4">Belum ada data penjualan</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- ================= GRAFIK PREDIKSI VS AKTUAL ================= -->
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4">Grafik Prediksi vs Aktual</h3>
+    <div class="h-72">
+        <canvas id="prediksiChart"></canvas>
     </div>
 </div>
 
@@ -134,6 +128,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Chart Prediksi vs Aktual
+    const ctx = document.getElementById('prediksiChart').getContext('2d');
+    fetch("{{ route('dashboard.prediksi.data') }}")
+        .then(res => res.json())
+        .then(data => {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Prediksi',
+                            data: data.prediksi,
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Aktual',
+                            data: data.aktual,
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
 });
 </script>
 

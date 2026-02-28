@@ -312,18 +312,7 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Description -->
-            <div class="text-center mt-8">
-                <h2 class="text-xl font-bold mb-2">
-                    <span class="kenalin-text">Kenalin kita</span> 
-                    <span class="kenalin-astera">ASTERA</span>
-                </h2>
-                <p class="text-sm description-text">
-                    Website penyedia inventaris barang untuk kebutuhan STI PLN UID Jakarta
-                </p>
-            </div>
-        </div>
+            </div> 
 
         <!-- Right Section - Login Form -->
         <div class="right-section">
@@ -386,12 +375,6 @@
                         @enderror
                     </div>
 
-                    <!-- Forgot Password -->
-                    <div class="text-right mb-6">
-                        <a href="{{ route('password.request') }}" class="link-custom">
-                            Lupa password?
-                        </a>
-                    </div>
 
                     <!-- Login Button -->
                     <button type="submit" class="login-btn">

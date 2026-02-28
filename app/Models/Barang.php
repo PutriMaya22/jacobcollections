@@ -14,8 +14,10 @@ class Barang extends Model
 
     // Kolom yang boleh diisi
     protected $fillable = [
+        'id',
         'nama',
         'kategori',
-        'harga'
+        'harga',
+        'stok'
     ];
 }

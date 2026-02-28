@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -17,10 +16,8 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
-        'contact_email',
         'profile_picture',
-        'banner_image',
-        'role', 
+        'role',
     ];
 
     protected $hidden = [
@@ -33,39 +30,23 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // Tambahkan method untuk check role
+    /* ================= ROLE CHECK ================= */
+
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
-    public function isUser()
+    public function isOwner()
     {
-        return $this->role === 'user_input';
-    }
-
-    public function isUserOperasional()
-    {
-        return $this->role === 'user_operasional';
-    }
-
-    public function notifications()
-    {
-        return $this->hasMany(\App\Models\Notification::class);
-    }
-
-    public function unreadNotifications()
-    {
-        return $this->notifications()->unread();
+        return $this->role === 'owner';
     }
 
     public function getRoleDisplayAttribute()
     {
-    return match($this->role) {
-        'admin' => 'Admin',
-        'user' => 'User (Input)',
-        'user_operasional' => 'User (Operasional)',
-        default => 'User'
-    };
+        return match($this->role) {
+            'admin' => 'Admin',
+            'owner' => 'Owner'
+        };
     }
 }

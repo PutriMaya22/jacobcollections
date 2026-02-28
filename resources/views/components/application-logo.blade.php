@@ -1,3 +1,3 @@
 <div class="sidebar-logo">
-    ASTERA
+    Jacobcollections
 </div>

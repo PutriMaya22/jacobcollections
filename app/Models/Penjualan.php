@@ -17,6 +17,7 @@ class Penjualan extends Model
         'total_penjualan',
         'total_pesanan',
         'penjualan_perpesanan',
+        'hasil_prediksi',
     ];
 
     protected $casts = [

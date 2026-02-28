@@ -13,7 +13,31 @@
         @csrf
         @method('PUT')
 
+        @php
+            $kategoriList = [
+                'Sedang Diskon' => 'Sedang Diskon',
+                'Deni' => 'Denim',
+                'Celana Panjang' => 'Celana Panjang',
+                'Celana Pendek' => 'Celana Pendek',
+                'Jas Formal' => 'Jas Formal'
+            ];
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- ID -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    ID Barang
+                </label>
+                <input
+                    type="number"
+                    name="id"
+                    value="{{ old('id', $data_barang->id) }}"
+                    class="w-full border rounded-lg px-4 py-2 bg-gray-100"
+                    readonly
+                >
+            </div>
 
             <!-- Nama Barang -->
             <div>
@@ -56,7 +80,7 @@
             </div>
 
             <!-- Harga -->
-            <div class="md:col-span-2">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                     Harga <span class="text-red-500">*</span>
                 </label>
@@ -69,6 +93,25 @@
                     required
                 >
                 @error('harga')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Stok -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Stok <span class="text-red-500">*</span>
+                </label>
+                <input
+                    type="number"
+                    name="stok"
+                    value="{{ old('stok', $data_barang->stok) }}"
+                    min="0"
+                    class="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-blue-200"
+                    placeholder="Jumlah stok barang"
+                    required
+                >
+                @error('stok')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Penjualan;
 use Illuminate\Http\Request;
+use App\Imports\PenjualanImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PenjualanController extends Controller
 {
@@ -71,9 +73,21 @@ class PenjualanController extends Controller
             ->route('data_penjualan.index')
             ->with('success', 'Data penjualan berhasil dihapus');
     }
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,csv'
+    ]);
+
+    Excel::import(new PenjualanImport, $request->file('file'));
+
+    return redirect()->route('data_penjualan.index')
+        ->with('success', 'Data berhasil diimport!');
+}
 
     public function show(Penjualan $data_penjualan)
     {
         return view('data_penjualan.show', compact('data_penjualan'));
     }
+
 }

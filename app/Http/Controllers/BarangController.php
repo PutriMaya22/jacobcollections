@@ -44,10 +44,12 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama'     => 'required|string|max:255',
-            'kategori' => 'required|string|max:100',
-            'harga'    => 'required|string|max:100'
-        ]);
+    'id'       => 'required|integer|unique:barangs,id',
+    'nama'     => 'required|string|max:255',
+    'kategori' => 'required|string|max:100',
+    'harga'    => 'required|string|max:100',
+    'stok'     => 'required|integer|min:0'
+]);
 
         Barang::create($request->all());
 
@@ -65,11 +67,12 @@ class BarangController extends Controller
     public function update(Request $request, Barang $data_barang)
     {
         $request->validate([
-            'nama'     => 'required|string|max:255',
-            'kategori' => 'required|string|max:100',
-            'harga'    => 'required|string|max:100'
-        ]);
-
+    'id'       => 'required|integer|unique:barangs,id',
+    'nama'     => 'required|string|max:255',
+    'kategori' => 'required|string|max:100',
+    'harga'    => 'required|string|max:100',
+    'stok'     => 'required|integer|min:0'
+]);
         $data_barang->update($request->all());
 
         return redirect()
@@ -94,10 +97,11 @@ class BarangController extends Controller
     private function getKategoriList()
     {
         return [
-            'Pakaian'   => 'Pakaian',
-            'Aksesoris' => 'Aksesoris',
-            'Kosmetik'  => 'Kosmetik',
-            'Elektronik'=> 'Elektronik'
+            'Sedang Diskon' => 'Sedang Diskon',
+            'Deni' => 'Denim',
+            'Celana Panjang'  => 'Celana Panjang',
+            'Celana Pendek'=> 'Celana Pendek',
+            'Jas Formal'=> 'Jas Formal'
         ];
     }
 }

@@ -10,10 +10,10 @@ use Illuminate\Validation\Rules;
 class UserController extends Controller
 {
     public function index()
-    {
-        $users = User::where('id', '!=', auth()->id())->get();
-        return view('users.index', compact('users'));
-    }
+{
+    $users = User::all();
+    return view('users.index', compact('users'));
+}
 
     public function create()
     {

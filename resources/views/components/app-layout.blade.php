@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'ASTERA')</title>
+    <title>@yield('title', 'Jacobcollections')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Stretch+Pro:wght@400&display=swap" rel="stylesheet">
@@ -196,13 +196,6 @@
             z-index: 9999 !important;
         }
 
-        /* Force Notification Bell */
-        #sidebar .relative button#notificationBell {
-            padding: 8px !important;
-            min-width: auto !important;
-            flex-shrink: 0 !important;
-            overflow: hidden !important;
-        }
         
         /* Force Profile Summary Container */
         #sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg {
@@ -240,13 +233,6 @@
             width: 100% !important;
         }
         
-        /* Force Notification Bell Container */
-        #sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg .flex-shrink-0 {
-            flex-shrink: 0 !important;
-            min-width: auto !important;
-            max-width: 60px !important;
-            overflow: hidden !important;
-        }
         
         /* Force Notification Bell Button */
         #sidebar .flex.items-center.gap-3.p-4.bg-gray-50.rounded-lg .flex-shrink-0 button {
@@ -457,27 +443,7 @@
                         </div>
                     </div>
                     
-                    <!-- Operasional -->
-                    <div class="mb-2">
-                        <button id="operasionalMenuButton" class="sidebar-link w-full text-left {{ request()->routeIs('barang_keluar.*') ? 'active' : '' }}">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-exchange-alt"></i>
-                                    <span>Operasional</span>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="operasionalMenuIcon"></i>
-                            </div>
-                        </button>
-                        
-                        <div id="operasionalSubMenu" class="{{ request()->routeIs('barang_keluar.*') ? 'show' : '' }}">
-                            <a href="{{ route('barang_keluar.index') }}" class="sidebar-link text-sm {{ request()->routeIs('barang_keluar.*') ? 'active' : '' }}">
-                                <i class="fas fa-arrow-up"></i> Barang Keluar
-                            </a>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-
+                    
             <!-- Bagian Bawah (Profile, Notifications, Settings, Logout) -->
             <div class="w-full px-6 mb-6 space-y-3">
                 <!-- Settings -->

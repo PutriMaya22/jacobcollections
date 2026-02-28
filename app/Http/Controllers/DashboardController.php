@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\Penjualan;
 use Illuminate\Support\Facades\Cache;
+ use App\Models\Prediksi;
+
 
 class DashboardController extends Controller
 {
@@ -77,4 +79,21 @@ class DashboardController extends Controller
 
         return view('dashboard', $data);
     }
+   
+public function getPrediksiData()
+{
+    // Ambil data prediksi terbaru
+    $data = Prediksi::orderBy('tanggal', 'asc')->get(['tanggal', 'hasil_prediksi', 'penjualan_aktual']);
+
+    // Format untuk chart
+    $labels = $data->pluck('tanggal');
+    $prediksi = $data->pluck('hasil_prediksi');
+    $aktual = $data->pluck('penjualan_aktual');
+
+    return response()->json([
+        'labels' => $labels,
+        'prediksi' => $prediksi,
+        'aktual' => $aktual
+    ]);
+}
 }
