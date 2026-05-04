@@ -11,9 +11,12 @@ class PenjualanImport
 {
     protected $successCount = 0;
     protected $failedCount = 0;
-    protected $zeroValueCount = 0; // Tambahan: counter untuk data nilai 0
+    protected $zeroValueCount = 0;
     protected $errors = [];
 
+    /**
+     * Main import method
+     */
     public function import($file)
     {
         try {
@@ -65,10 +68,10 @@ class PenjualanImport
                         continue;
                     }
                     
-                    // 🔥 BARU: Bersihkan angka penjualan dengan format Indonesia (titik dan koma)
+                    // Bersihkan angka penjualan dengan format Indonesia
                     $totalPenjualanClean = $this->parseIndonesianNumber($totalPenjualan);
                     
-                    // 🔥 BARU: Bersihkan angka pesanan dengan format Indonesia
+                    // Bersihkan angka pesanan dengan format Indonesia
                     $totalPesananClean = $this->parseIndonesianNumber($totalPesanan);
                     
                     // Catat data dengan nilai 0
@@ -173,10 +176,14 @@ class PenjualanImport
     {
         if (empty($date)) return null;
         
-        // Jika sudah dalam format Excel serial number
+        // Jika sudah Carbon
+        if ($date instanceof Carbon) {
+            return $date->format('Y-m-d');
+        }
+        
+        // Jika numeric (Excel serial)
         if (is_numeric($date)) {
             try {
-                // Excel serial number to date
                 $unix = ($date - 25569) * 86400;
                 return date('Y-m-d', $unix);
             } catch (\Exception $e) {
@@ -184,31 +191,30 @@ class PenjualanImport
             }
         }
         
-        $dateStr = trim((string)$date);
+        $str = trim((string) $date);
+        
+        // Hapus teks hari (Monday, Tuesday, etc)
+        $str = preg_replace('/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)\b/i', '', $str);
+        $str = trim($str);
         
         try {
-            // Format Y-m-d
-            if (preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $dateStr)) {
-                return Carbon::parse($dateStr)->format('Y-m-d');
+            // Format dd-mm-yyyy atau dd/mm/yyyy
+            if (preg_match('/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/', $str, $matches)) {
+                return Carbon::createFromDate($matches[3], $matches[2], $matches[1])->format('Y-m-d');
             }
             
-            // Format Y/m/d
-            if (preg_match('/^\d{4}\/\d{1,2}\/\d{1,2}$/', $dateStr)) {
-                return Carbon::parse($dateStr)->format('Y-m-d');
+            // Format yyyy-mm-dd atau yyyy/mm/dd
+            if (preg_match('/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/', $str, $matches)) {
+                return Carbon::createFromDate($matches[1], $matches[2], $matches[3])->format('Y-m-d');
             }
             
-            // Format d/m/Y atau d-m-Y
-            if (preg_match('/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/', $dateStr)) {
-                return Carbon::createFromFormat('d/m/Y', str_replace('-', '/', $dateStr))->format('Y-m-d');
+            // Format d-m-yyyy dengan bulan teks (contoh: 25-Jan-2024)
+            if (preg_match('/^(\d{1,2})[- ](\w+)[- ](\d{4})$/', $str, $matches)) {
+                return Carbon::createFromFormat('d M Y', $matches[1] . ' ' . $matches[2] . ' ' . $matches[3])->format('Y-m-d');
             }
             
-            // Format m/d/Y
-            if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $dateStr)) {
-                return Carbon::createFromFormat('m/d/Y', $dateStr)->format('Y-m-d');
-            }
-            
-            // Format lain (biarkan Carbon mencoba)
-            return Carbon::parse($dateStr)->format('Y-m-d');
+            // Biarkan Carbon mencoba
+            return Carbon::parse($str)->format('Y-m-d');
             
         } catch (\Exception $e) {
             return null;
@@ -216,98 +222,89 @@ class PenjualanImport
     }
     
     /**
-     * 🔥 FUNGSI BARU 1: Parsing angka format Indonesia
+     * Parsing angka format Indonesia ke integer
      * Menangani format:
      * - 337.250  -> 337250
-     * - 112.416,67 -> 112416 (integer)
+     * - 112.416,67 -> 112416
      * - 1.500.000 -> 1500000
      * - Rp 337.250 -> 337250
      * - 337250 (langsung) -> 337250
-     * - 337,250 (koma sebagai ribuan) -> 337250
-     * - 112416.67 -> 112416
      */
-   /**
- * 🔥 PARSING ANGKA FORMAT INDONESIA - VERSI SEDERHANA
- */
-/**
- * 🔥 PARSING ANGKA FORMAT INDONESIA - FINAL FIX
- * Contoh: "337.250" -> 337250, "1.500.000" -> 1500000
- */
-/**
- * 🔥 PARSING ANGKA - VERSION FINAL
- */
-private function parseIndonesianNumber($value)
-{
-    // Jika kosong
-    if (empty($value) && $value !== 0) {
-        return 0;
-    }
-    
-    // Konversi ke string dan bersihkan
-    $str = (string) $value;
-    
-    // Hapus semua titik dan koma
-    $str = str_replace('.', '', $str);
-    $str = str_replace(',', '', $str);
-    
-    // Hapus semua yang bukan angka
-    $str = preg_replace('/[^0-9]/', '', $str);
-    
-    // Konversi ke integer
-    $result = (int) $str;
-    
-    return $result;
-}
-    
-    /**
-     * 🔥 FUNGSI BARU 2: Bersihkan angka (tetap dipertahankan untuk kompatibilitas)
-     */
-    private function cleanNumber($value)
+    private function parseIndonesianNumber($value)
     {
+        // Jika kosong
         if (empty($value) && $value !== 0 && $value !== '0') {
             return 0;
         }
         
-        // Jika sudah numeric
-        if (is_numeric($value)) {
-            return (int) $value;
+        // Konversi ke string
+        $str = (string) $value;
+        
+        // Hapus prefix Rp / rupiah
+        $str = preg_replace('/^Rp\s*/i', '', $str);
+        
+        // Jika sudah numeric, return langsung
+        if (is_numeric($str) && !str_contains($str, '.') && !str_contains($str, ',')) {
+            return (int) $str;
         }
         
-        $str = trim((string)$value);
+        // Hapus semua titik (pemisah ribuan)
+        $str = str_replace('.', '', $str);
         
-        // Hapus semua karakter kecuali angka
-        $cleaned = preg_replace('/[^0-9]/', '', $str);
+        // Ganti koma dengan titik (desimal) lalu ambil bagian integer saja
+        $str = str_replace(',', '.', $str);
         
-        if (empty($cleaned)) {
-            return 0;
+        // Ambil bagian integer (sebelum desimal)
+        if (str_contains($str, '.')) {
+            $parts = explode('.', $str);
+            $str = $parts[0];
         }
         
-        $result = (int) $cleaned;
+        // Hapus semua yang bukan angka
+        $str = preg_replace('/[^0-9]/', '', $str);
+        
+        // Konversi ke integer
+        $result = (int) $str;
         
         return $result < 0 ? 0 : $result;
     }
     
+    /**
+     * Add error message (kept for compatibility)
+     */
     private function addError($error)
     {
         $this->failedCount++;
         $this->errors[] = $error;
     }
     
+    /**
+     * Get success count
+     */
     public function getSuccessCount()
     {
         return $this->successCount;
     }
     
+    /**
+     * Get failed count
+     */
     public function getFailedCount()
     {
         return $this->failedCount;
     }
     
+    /**
+     * Get zero value count
+     */
     public function getZeroValueCount()
     {
         return $this->zeroValueCount;
     }
     
+    /**
+     * Get errors array
+     */
     public function getErrors()
     {
         return $this->errors;

@@ -68,10 +68,6 @@
             Owner
         </option>
 
-        <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>
-            User
-        </option>
-
     </select>
 
     @error('role')

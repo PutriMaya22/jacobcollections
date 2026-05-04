@@ -224,3 +224,155 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+/* ==================== RESPONSIVE STYLES ==================== */
+* {
+    box-sizing: border-box;
+}
+
+/* Mobile First Approach */
+.container-fluid {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Responsive Table */
+.responsive-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table table {
+    min-width: 600px;
+}
+
+/* Card Grid Responsive */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Stat Cards Responsive */
+.stat-card-responsive {
+    transition: all 0.3s ease;
+}
+
+/* Mobile Menu Improvements */
+@media (max-width: 768px) {
+    /* Stack buttons vertically */
+    .flex-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .flex-buttons > * {
+        width: 100%;
+    }
+    
+    /* Smaller padding on mobile */
+    .content-padding {
+        padding: 1rem;
+    }
+    
+    /* Responsive text sizes */
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.25rem;
+    }
+    
+    h3 {
+        font-size: 1.125rem;
+    }
+    
+    /* Stat cards full width on mobile */
+    .stat-card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Form responsive */
+    .form-responsive {
+        flex-direction: column;
+    }
+    
+    .form-responsive .form-field {
+        width: 100%;
+    }
+    
+    /* Modal responsive */
+    .modal-content {
+        width: 95%;
+        margin: 1rem auto;
+    }
+    
+    /* Table horizontal scroll hint */
+    .table-wrapper::after {
+        content: "← geser untuk lihat lebih banyak →";
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: #6b7280;
+        padding: 0.5rem;
+        background: #f3f4f6;
+    }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stat-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .content-padding {
+        padding: 1.5rem;
+    }
+}
+
+/* Desktop Responsive */
+@media (min-width: 1025px) {
+    .content-padding {
+        padding: 2rem;
+    }
+}
+
+/* Touch-friendly buttons */
+@media (hover: none) and (pointer: coarse) {
+    button, 
+    .btn,
+    a.btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    input, select, textarea {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+}
+
+/* Loading and empty states */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+/* Toast notifications responsive */
+.toast-notification {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    z-index: 9999;
+}
+
+@media (min-width: 640px) {
+    .toast-notification {
+        left: auto;
+        min-width: 300px;
+        max-width: 400px;
+    }
+}

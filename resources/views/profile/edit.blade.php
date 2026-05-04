@@ -94,30 +94,6 @@ use Illuminate\Support\Facades\Storage;
                     @enderror
                 </div>
 
-                <!-- Profile Picture -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                    <div class="flex items-center gap-3">
-                        <button id="editProfileBtn" type="button" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all">Upload New</button>
-                        <button id="deleteProfileBtn" type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">Remove</button>
-                    </div>
-                    <input type="file" id="profileInput" name="profile_picture" accept="image/*" class="hidden">
-                    <input type="hidden" id="deleteProfileFlag" name="delete_profile_picture" value="0">
-                </div>
-
-                <!-- Phone Number -->
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                    <div class="flex">
-                        <div class="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-700 font-medium">
-                            <img src="https://flagcdn.com/w20/id.png" alt="ID" class="w-5 h-3 mr-2">
-                            <span>+62</span>
-                        </div>
-                        <input type="tel" id="phone" name="phone" value="{{ old('phone', Auth::user()->phone) }}"
-                               class="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                               placeholder="Enter phone number">
-                    </div>
-                </div>
 
                 <!-- Contact Email -->
                 <div>
@@ -195,26 +171,6 @@ use Illuminate\Support\Facades\Storage;
                     <input type="password" id="password_confirmation" name="password_confirmation" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                            placeholder="Confirm new password">
-                </div>
-
-                <!-- OTP Code -->
-                <div>
-                    <label for="otp_code" class="block text-sm font-medium text-gray-700 mb-2">OTP Code</label>
-                    <div class="flex gap-3">
-                        <input type="text" id="otp_code" name="otp_code" maxlength="4"
-                               class="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                               placeholder="1234">
-                        <button id="sendOtpButton" type="submit" form="sendOtpForm" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Kirim OTP</button>
-                    </div>
-                    @if (session('status') && session('open_tab') === 'password')
-                        <p class="mt-2 text-sm text-green-600">{{ session('status') }}</p>
-                    @endif
-                    @if (session('error') && session('open_tab') === 'password')
-                        <p class="mt-2 text-sm text-red-600">{{ session('error') }}</p>
-                    @endif
-                    @error('otp_code', 'updatePassword')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <!-- Save Button -->
