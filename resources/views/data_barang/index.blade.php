@@ -359,33 +359,35 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
                         $totalDilihat = $item->total_dilihat ?? 0;
                         $totalKlik = $item->total_klik ?? 0;
                         $totalPesanan = $item->total_pesanan ?? 0;
+                         $ctr = $item->persentase_klik ?? 0;
+                         $cr = $item->tingkat_konversi ?? 0;
                         
-                        $ctr = $totalDilihat > 0 ? round(($totalKlik / $totalDilihat) * 100, 1) : 0;
-                        $cr = $totalKlik > 0 ? round(($totalPesanan / $totalKlik) * 100, 1) : 0;
+                        // Format untuk CR Class (opsional)
+    if ($cr > 10) {
+        $crClass = 'cr-high';
+        $crIcon = '';
+    } elseif ($cr > 5) {
+        $crClass = 'cr-medium';
+        $crIcon = '';
+    } elseif ($cr > 2) {
+        $crClass = 'cr-low';
+        $crIcon = '';
+    } else {
+        $crClass = 'cr-very-low';
+        $crIcon = '';
+    }
+    
+    // Status Produk Class
+    $statusClass = '';
+    if ($item->status_produk == 'Normal') {
+        $statusClass = 'status-active';
+    } elseif ($item->status_produk == 'Diblokir') {
+        $statusClass = 'status-inactive';
+    } else {
+        $statusClass = 'status-draft';
+    }
                         
-                        if ($cr > 10) {
-                            $crClass = 'cr-high';
-                            $crIcon = '';
-                        } elseif ($cr > 5) {
-                            $crClass = 'cr-medium';
-                            $crIcon = '';
-                        } elseif ($cr > 2) {
-                            $crClass = 'cr-low';
-                            $crIcon = '';
-                        } else {
-                            $crClass = 'cr-very-low';
-                            $crIcon = '';
-                        }
-                        
-                        // Status Produk Class
-                        $statusClass = '';
-                        if ($item->status_produk == 'Active') {
-                            $statusClass = 'status-active';
-                        } elseif ($item->status_produk == 'Inactive') {
-                            $statusClass = 'status-inactive';
-                        } else {
-                            $statusClass = 'status-draft';
-                        }
+                     
                     @endphp
                     <tr class="product-card hover:bg-gray-50 transition">
                         <td class="px-6 py-4 text-sm text-gray-500">

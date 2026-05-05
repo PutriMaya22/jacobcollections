@@ -10,19 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Barang::query();
         
-        // Filter status (opsional)
         if ($request->filled('status_produk')) {
             $query->where('status_produk', $request->status_produk);
         }
         
-        // Filter search
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('nama', 'like', '%' . $request->search . '%')
@@ -31,12 +26,10 @@ class BarangController extends Controller
             });
         }
         
-        // Filter kategori
         if ($request->filled('kategori')) {
             $query->where('kategori', $request->kategori);
         }
         
-        // Filter stok status
         if ($request->filled('stok_status')) {
             if ($request->stok_status == 'habis') {
                 $query->where('stok', '<=', 0);
@@ -47,10 +40,8 @@ class BarangController extends Controller
             }
         }
         
-        // Sorting
         $sortBy = $request->get('sort_by', 'nama');
         $sortOrder = $request->get('sort_order', 'asc');
-        
         $allowedSort = ['nama', 'stok', 'kategori', 'total_penjualan', 'kode_produk'];
         if (!in_array($sortBy, $allowedSort)) {
             $sortBy = 'nama';
@@ -60,211 +51,162 @@ class BarangController extends Controller
         $perPage = $request->input('per_page', 20);
         $barang = $query->paginate($perPage);
         
-        // Ambil daftar kategori unik untuk filter
         $kategoriList = Barang::select('kategori')->distinct()->whereNotNull('kategori')->pluck('kategori');
-        
-        // HITUNG STATUS PRODUK
         $totalBarangNormal = Barang::where('status_produk', 'Normal')->count();
         $statusDiblokir = Barang::where('status_produk', 'Diblokir')->count();
         $statusDiarsipkan = Barang::where('status_produk', 'Diarsipkan')->count();
-        
-        // TOTAL SEMUA PRODUK (untuk keperluan lain jika perlu)
         $totalSemuaBarang = Barang::count();
-        
-        // Hitung stok (tetap dari semua produk)
         $totalStok = Barang::sum('stok') ?? 0;
         $barangHabis = Barang::where('stok', '<=', 0)->count();
         $barangMenipis = Barang::where('stok', '>', 0)->where('stok', '<=', 10)->count();
-        $totalNilaiStok = 0; // Bisa diisi jika ada kolom harga
+        $totalNilaiStok = 0;
         $totalPesanan = (int) DB::table('data_barang')->sum('total_pesanan');
         
         return view('data_barang.index', compact(
-            'barang', 
-            'kategoriList', 
-            'totalBarangNormal',
-            'totalSemuaBarang',
-            'totalStok',
-            'barangHabis',
-            'barangMenipis',
-            'totalNilaiStok',
-            'totalPesanan',
-            'statusDiblokir',
-            'statusDiarsipkan'
+            'barang', 'kategoriList', 'totalBarangNormal', 'totalSemuaBarang',
+            'totalStok', 'barangHabis', 'barangMenipis', 'totalNilaiStok',
+            'totalPesanan', 'statusDiblokir', 'statusDiarsipkan'
         ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('data_barang.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'kode_produk' => 'required|string|max:50|unique:data_barang,kode_produk',
-            'nama' => 'required|string|max:255',
-            'kategori' => 'required|string|max:100',
-            'stok' => 'required|integer|min:0',
-            'status_produk' => 'nullable|string|max:50',
-        ]);
-        
-        try {
-            Barang::create([
-                'kode_produk' => $request->kode_produk,
-                'nama' => $request->nama,
-                'kategori' => $request->kategori,
-                'stok' => $request->stok,
-                'status_produk' => $request->status_produk,
-                'total_penjualan' => 0,
-                'total_dilihat' => 0,
-                'total_klik' => 0,
-                'total_pesanan' => 0,
-                'persentase_klik' => 0,
-                'tingkat_konversi' => 0,
-                'penjualan_per_pesanan' => 0,
-            ]);
-            
-            return redirect()->route('data_barang.index')
-                ->with('success', 'Produk berhasil ditambahkan!');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal menambahkan produk: ' . $e->getMessage());
-        }
-    }
+   public function store(Request $request)
+{
+    // Bersihkan total penjualan (hapus titik)
+    $cleanTotalPenjualan = str_replace('.', '', $request->total_penjualan);
+    
+    // Data dasar
+    $data = [
+        'kode_produk' => $request->kode_produk,
+        'nama' => $request->nama,
+        'kategori' => $request->kategori,
+        'status_produk' => $request->status_produk,
+        'stok' => (int) $request->stok,
+        'total_penjualan' => (int) $cleanTotalPenjualan,
+        'total_dilihat' => (int) $request->total_dilihat ?: 0,
+        'total_klik' => (int) $request->total_klik ?: 0,
+        'total_pesanan' => (int) $request->total_pesanan ?: 0,
+        'total_pembeli' => (int) $request->total_pembeli ?? 0,
+        // 🔥🔥🔥 AMBIL DARI FORM (sudah terbukti ada nilainya 2 dan 2) 🔥🔥🔥
+        'persentase_klik' => (float) ($request->persentase_klik ?: 0),
+        'tingkat_konversi' => (float) ($request->tingkat_konversi ?: 0),
+        'penjualan_per_pesanan' => 0,
+        'rasio_penjualan' => 0,
+    ];
+    
+    // Validasi
+    $request->validate([
+        'nama' => 'required',
+        'kategori' => 'required',
+        'stok' => 'required|integer|min:0',
+    ]);
+    
+    // Simpan
+    Barang::create($data);
+    
+    // Redirect dengan pesan sukses
+    return redirect()->route('data_barang.index')
+        ->with('success', "Produk ditambahkan! CTR: {$data['persentase_klik']}%, CR: {$data['tingkat_konversi']}%");
+}
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $barang = Barang::findOrFail($id);
         return view('data_barang.show', compact('barang'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $data_barang = Barang::findOrFail($id);
         return view('data_barang.edit', compact('data_barang'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // 🔥🔥🔥 UPDATE DENGAN INPUT MANUAL 🔥🔥🔥
     public function update(Request $request, $id)
     {
         $data_barang = Barang::findOrFail($id);
         
-        $validated = $request->validate([
-            'kode_produk' => 'required|string|max:50',
+        $cleanTotalPenjualan = str_replace('.', '', $request->total_penjualan);
+        
+        $request->validate([
             'nama' => 'required|string|max:255',
             'kategori' => 'required|string|max:100',
-            'status_produk' => 'nullable|string|max:50',
-            'total_penjualan' => 'nullable|integer',
-            'total_dilihat' => 'nullable|integer',
-            'total_klik' => 'nullable|integer',
-            'total_pesanan' => 'nullable|integer',
-            'total_pembeli' => 'nullable|integer',
             'stok' => 'required|integer|min:0',
+            'status_produk' => 'nullable|string|max:50',
         ]);
         
-        // Bersihkan format rupiah jika ada (dari form input)
-        if (isset($validated['total_penjualan']) && is_string($validated['total_penjualan'])) {
-            $validated['total_penjualan'] = (int) str_replace('.', '', $validated['total_penjualan']);
-        }
+        $data_barang->update([
+            'kode_produk' => $request->kode_produk,
+            'nama' => $request->nama,
+            'kategori' => $request->kategori,
+            'stok' => (int) $request->stok ?: 0,
+            'status_produk' => $request->status_produk,
+            'total_penjualan' => (int) $cleanTotalPenjualan ?: 0,
+            'total_dilihat' => 0,
+            'total_klik' => 0,
+            'total_pesanan' => (int) $request->total_pesanan ?: 0,
+            'total_pembeli' => (int) $request->total_pembeli ?: 0,
+            'persentase_klik' => (float) $request->persentase_klik ?: 0,
+            'tingkat_konversi' => (float) $request->tingkat_konversi ?: 0,
+        ]);
         
-        // Hitung rasio penjualan, persentase klik, dan tingkat konversi
-        $totalDilihat = $validated['total_dilihat'] ?? 0;
-        $totalKlik = $validated['total_klik'] ?? 0;
-        $totalPesanan = $validated['total_pesanan'] ?? 0;
-        $totalPenjualan = $validated['total_penjualan'] ?? 0;
-        
-        $validated['persentase_klik'] = $totalDilihat > 0 ? ($totalKlik / $totalDilihat) * 100 : 0;
-        $validated['tingkat_konversi'] = $totalKlik > 0 ? ($totalPesanan / $totalKlik) * 100 : 0;
-        $validated['penjualan_per_pesanan'] = $totalPesanan > 0 ? $totalPenjualan / $totalPesanan : 0;
-        $validated['rasio_penjualan'] = 0;
-        
-        $data_barang->update($validated);
-        
-        return redirect()->route('data_barang.index')->with('success', 'Barang berhasil diupdate!');
+        return redirect()->route('data_barang.index')
+            ->with('success', 'Barang berhasil diupdate!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         try {
             $barang = Barang::findOrFail($id);
             $barang->delete();
-            
-            return redirect()->route('data_barang.index')
-                ->with('success', 'Produk berhasil dihapus!');
-                
+            return redirect()->route('data_barang.index')->with('success', 'Produk berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
     
- /**
- * Import data from Excel
- */
-public function import(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'file'  => 'required|mimes:xlsx,xls,csv|max:2048',
-        'bulan' => 'required|integer|min:1|max:12',
-        'tahun' => 'required|integer|min:2020|max:2030',
-    ]);
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020|max:2030',
+        ]);
 
-    try {
-        $bulan = $request->bulan;
-        $tahun = $request->tahun;
-        $tanggalPenjualan = date("$tahun-$bulan-01");
-        
-        // 🔥 KIRIM TANGGAL KE IMPORT CLASS
-        $import = new \App\Imports\BarangImport($tanggalPenjualan);
-        
-        $file = $request->file('file');
-        $import->import($file->getPathName());
-        
-        $successCount = $import->getSuccessCount();
-        $failedCount = $import->getFailedCount();
-        
-        $namaBulan = $this->getNamaBulan($bulan);
-        $message = "✅ Berhasil import {$successCount} data untuk {$namaBulan} {$tahun}";
-        
-        if ($failedCount > 0) {
-            $message .= " | ❌ Gagal: {$failedCount} data";
+        try {
+            $bulan = $request->bulan;
+            $tahun = $request->tahun;
+            $tanggalPenjualan = date("$tahun-$bulan-01");
+            $import = new \App\Imports\BarangImport($tanggalPenjualan);
+            $file = $request->file('file');
+            $import->import($file->getPathName());
+            
+            $successCount = $import->getSuccessCount();
+            $failedCount = $import->getFailedCount();
+            $namaBulan = $this->getNamaBulan($bulan);
+            $message = "✅ Berhasil import {$successCount} data untuk {$namaBulan} {$tahun}";
+            
+            if ($failedCount > 0) {
+                $message .= " | ❌ Gagal: {$failedCount} data";
+            }
+            
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
-        
-        return redirect()->back()->with('success', $message);
-        
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
     }
-}
 
-// Helper function bulan
-private function getNamaBulan($bulan)
-{
-    $nama = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-    ];
-    return $nama[$bulan] ?? 'Unknown';
-}
+    private function getNamaBulan($bulan)
+    {
+        $nama = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        return $nama[$bulan] ?? 'Unknown';
+    }
 }
