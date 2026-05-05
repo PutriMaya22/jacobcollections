@@ -156,10 +156,6 @@
                             {{ $status }}
                         </p>
                     </div>
-                    <div class="bg-white rounded-lg p-4 shadow-sm">
-                        <p class="text-gray-500 text-sm">Strategi Rekomendasi</p>
-                        <p class="text-md font-medium text-blue-600">{{ $strategi_umum ?? 'Tidak ada strategi' }}</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -292,152 +288,282 @@
                 </div>
             </div>
             
-            {{-- REKOMENDASI UTAMA - 3 PILAR --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                
-             {{-- 1. PRODUK TERLARIS (TAMPIL 5 SAJA) --}}
-@if(isset($produk_terlaris) && $produk_terlaris->count() > 0)
-    @php
-        $produkTerlarisTop5 = $produk_terlaris->take(5);
-    @endphp
-    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-5 border-l-4 border-yellow-500 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3">5 Produk Terlaris</h4>
-        <div class="text-xs text-gray-500 mb-2">
-            Menampilkan {{ $produkTerlarisTop5->count() }} dari {{ $produk_terlaris->count() }} produk
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-yellow-100 sticky top-0">
-                    <tr>
-                        <th class="text-left py-2 px-2">#</th>
-                        <th class="text-left py-2 px-2">Nama Produk</th>
-                        <th class="text-center py-2 px-2">Total Pesanan</th>
-                        <th class="text-center py-2 px-2">Stok</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($produkTerlarisTop5 as $produk)
-                        <tr class="border-b border-yellow-200 hover:bg-yellow-50">
-                            <td class="py-2 px-2 font-semibold">{{ $loop->iteration }}</td>
-                            <td class="py-2 px-2 break-words whitespace-normal max-w-[300px] text-sm">
-                                {{ $produk->nama }}
-                            </td>
-                            <td class="py-2 px-2 text-center text-blue-600 font-semibold text-sm">
-                                {{ number_format($produk->total_pesanan ?? 0, 0, ',', '.') }} pesanan
-                            </td>
-                            <td class="py-2 px-2 text-center 
-                                @if(($produk->stok ?? 0) <= 0) text-red-600 font-bold
-                                @elseif(($produk->stok ?? 0) <= 10) text-orange-600 font-semibold
-                                @else text-gray-600 @endif">
-                                {{ number_format($produk->stok ?? 0) }} pcs
-                                @if(($produk->stok ?? 0) <= 0) (HABIS) @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-@else
-    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border-l-4 border-gray-400 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3">Semua Produk Terlaris</h4>
-        <p class="text-sm text-gray-500">Belum ada data produk</p>
-    </div>
-@endif
+     @php
+    $forecastProduk = session('rekomendasi_produk', []);
+    $produkTerlarisList = (isset($produk_terlaris) && $produk_terlaris->count() > 0)
+        ? $produk_terlaris
+        : collect();
 
+    $scrollHeight = 'max-h-[320px]';
+@endphp
 
-              {{-- 2. PRODUK PALING DIMINATI (SEMUA PRODUK) --}}
-@if(isset($produk_paling_diminati) && is_array($produk_paling_diminati) && count($produk_paling_diminati) > 0)
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    {{-- 1. PRODUK TERLARIS --}}
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-l-4 border-blue-500 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3"> 5 Produk Paling Diminati</h4>
-        <div class="text-xs text-gray-500 mb-2">Total {{ count($produk_paling_diminati) }} produk</div>
-        <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            @foreach($produk_paling_diminati as $index => $produk)
-                <div class="border-b border-blue-100 pb-2 last:border-0 hover:bg-blue-50/50 p-2 rounded">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center gap-2 flex-1">
-                            <span class="font-medium text-sm">{{ $loop->iteration }}.</span>
-                            <span class="text-sm font-medium">{{ $produk['nama'] ?? '-' }}</span>
+        <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                <span class="text-xl"></span>
+                Produk Terlaris
+            </h4>
+
+            @if(isset($produk_terlaris) && $produk_terlaris->count() > 0)
+                <p class="text-xs text-gray-500 mt-1">
+                    Total {{ $produk_terlaris->count() }} produk
+                </p>
+            @endif
+        </div>
+
+        @if(isset($produk_terlaris) && $produk_terlaris->count() > 0)
+            <div class="overflow-y-auto pr-2 space-y-3 {{ $scrollHeight }}">
+                @foreach($produkTerlarisList as $produk)
+                    <div class="bg-white/70 rounded-lg p-3 hover:shadow-md transition min-h-[72px]">
+                        <div class="flex items-start gap-3">
+                            <span class="shrink-0 text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                                {{ $loop->iteration }}
+                            </span>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold text-gray-800 text-sm line-clamp-2">
+                                    {{ $produk->nama }}
+                                </div>
+
+                                <div class="flex flex-wrap gap-3 mt-2 text-xs">
+                                    <span class="text-blue-600 font-medium">
+                                        {{ number_format($produk->total_pesanan ?? 0, 0, ',', '.') }} pesanan
+                                    </span>
+
+                                    <span class="text-gray-500">
+                                        Stok:
+                                        <span class="
+                                            @if(($produk->stok ?? 0) <= 0)
+                                                text-red-600 font-bold
+                                            @elseif(($produk->stok ?? 0) <= 10)
+                                                text-orange-600 font-semibold
+                                            @else
+                                                text-gray-700 font-medium
+                                            @endif
+                                        ">
+                                            {{ number_format($produk->stok ?? 0) }} pcs
+                                            @if(($produk->stok ?? 0) <= 0)
+                                                (HABIS)
+                                            @endif
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">{{ $produk['rekomendasi'] ?? 'Tidak ada rekomendasi' }}</p>
-                    <div class="flex gap-3 mt-1 flex-wrap text-xs">
-                        @if(($produk['cr'] ?? 0) > 0)
-                            <span class="text-green-600">CR: {{ $produk['cr'] }}%</span>
-                        @endif
-                        @if(($produk['ctr'] ?? 0) > 0)
-                            <span class="text-blue-600">CTR: {{ $produk['ctr'] }}%</span>
-                        @endif
-                        @if(isset($produk['terjual']) && $produk['terjual'] > 0)
-                            <span class="text-orange-600">Terjual: Rp {{ number_format($produk['terjual'], 0, ',', '.') }}</span>
-                        @endif
-                        @if(isset($produk['stok']) && $produk['stok'] > 0)
-                            <span class="text-gray-500">Stok: {{ number_format($produk['stok']) }} pcs</span>
-                        @endif
-                    </div>
-                </div>
-            @endforeach
-        </div>
-        <div class="mt-3 pt-2 border-t border-blue-200">
-            <p class="text-xs text-gray-600">Popularity Score = 40% Penjualan + 30% CTR + 30% CR</p>
-        </div>
+                @endforeach
+            </div>
+        @else
+            <div class="flex items-center justify-center h-[320px]">
+                <p class="text-sm text-gray-500 text-center">Belum ada data produk</p>
+            </div>
+        @endif
     </div>
-@else
-    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border-l-4 border-gray-400 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3">Semua Produk Paling Diminati</h4>
-        <p class="text-sm text-gray-500">Belum ada data produk diminati</p>
-    </div>
-@endif
 
-               {{-- 3. PRIORITAS RESTOCK (TAMPIL 5 SAJA) --}}
-@if(isset($ringkasan_restock['prioritas_restock']) && is_array($ringkasan_restock['prioritas_restock']) && count($ringkasan_restock['prioritas_restock']) > 0)
-    @php
-        $prioritasRestockTop5 = collect($ringkasan_restock['prioritas_restock'])->take(5);
-    @endphp
-    <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-5 border-l-4 border-red-500 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3">5 Prioritas Restock</h4>
-        <div class="text-xs text-gray-500 mb-2">
-            Menampilkan {{ $prioritasRestockTop5->count() }} dari {{ count($ringkasan_restock['prioritas_restock']) }} produk perlu perhatian
+    {{-- 2. PRODUK PALING DIMINATI --}}
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-5 border-l-4 border-purple-500 shadow-sm">
+        <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                <span class="text-xl"></span>
+                10 Produk Paling Diminati
+            </h4>
+
+            @if(isset($produk_paling_diminati) && is_array($produk_paling_diminati) && count($produk_paling_diminati) > 0)
+                <p class="text-xs text-gray-500 mt-1">
+                    Total {{ count($produk_paling_diminati) }} produk
+                </p>
+            @endif
         </div>
-        <div class="space-y-3 pr-2">
-            @foreach($prioritasRestockTop5 as $restock)
-                <div class="border-b border-red-100 pb-2 last:border-0 hover:bg-red-50/50 p-2 rounded">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="font-medium text-sm flex-1">{{ $loop->iteration }}. {{ $restock['nama'] ?? '-' }}</span>
-                        <span class="text-xs font-bold px-2 py-0.5 rounded-full 
-                            @if(($restock['urgensi'] ?? '') == 'Sangat Tinggi') bg-red-600 text-white
-                            @elseif(($restock['urgensi'] ?? '') == 'Tinggi') bg-orange-500 text-white
-                            @else bg-yellow-500 text-white 
-                            @endif">
-                            {{ $restock['urgensi'] ?? 'Normal' }}
-                        </span>
-                    </div>
-                    <div class="flex flex-wrap justify-between text-xs text-gray-600 mt-1 gap-2">
-                        <span>Stok: {{ number_format($restock['stok'] ?? 0) }} pcs</span>
-                        <span>CR: {{ $restock['cr'] ?? 0 }}%</span>
-                        @if(isset($restock['terjual']))
-                            <span>Terjual: Rp {{ number_format($restock['terjual'], 0, ',', '.') }}</span>
-                        @endif
-                    </div>
-                    <p class="text-xs font-semibold text-blue-600 mt-1">
-                        Rekomendasi Restock: {{ number_format($restock['rekomendasi_restock'] ?? 0) }} pcs
-                    </p>
-                    @if(($restock['stok'] ?? 0) <= 0)
-                        <p class="text-xs font-bold text-red-600 mt-1">STOK HABIS - Segera Restock!</p>
-                    @endif
-                </div>
-            @endforeach
-        </div>
-        <div class="mt-3 pt-2 border-t border-red-200">
-           
-        </div>
+
+        @if(isset($produk_paling_diminati) && is_array($produk_paling_diminati) && count($produk_paling_diminati) > 0)
+            <div class="overflow-y-auto rounded-lg bg-white/40 {{ $scrollHeight }}">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-purple-100 sticky top-0 z-10">
+                        <tr>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-700">#</th>
+                            <th class="text-left py-3 px-3 font-semibold text-gray-700">Nama Produk</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-700">CTR</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-700">CR</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-700">Stok</th>
+                            <th class="text-center py-3 px-3 font-semibold text-gray-700">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($produk_paling_diminati as $produk)
+                            @php
+                                $ctr = $produk['ctr'] ?? $produk['persentase_klik'] ?? 0;
+                                $cr = $produk['cr'] ?? $produk['tingkat_konversi'] ?? 0;
+                                $stok = $produk['stok'] ?? 0;
+                                $nama = $produk['nama'] ?? '-';
+                                $rekomendasi = $produk['rekomendasi'] ?? 'Tidak ada rekomendasi';
+                                $score = $produk['popularity_score'] ?? 0;
+
+                                $scoreColor = $score >= 80
+                                    ? 'bg-green-100 text-green-700'
+                                    : ($score >= 50
+                                        ? 'bg-yellow-100 text-yellow-700'
+                                        : 'bg-purple-100 text-purple-700');
+
+                                $crDisplay = min(100, $cr);
+                            @endphp
+
+                            <tr class="border-b border-purple-100 hover:bg-purple-50 align-top min-h-[64px]">
+                                <td class="py-3 px-3 font-semibold text-purple-600">
+                                    {{ $loop->iteration }}
+                                </td>
+
+                                <td class="py-3 px-3 min-w-[220px]">
+                                    <div class="font-semibold text-gray-800 text-sm line-clamp-2">
+                                        {{ $nama }}
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-1 line-clamp-1">
+                                        {{ $rekomendasi }}
+                                    </div>
+                                </td>
+
+                                <td class="py-3 px-3 text-center">
+                                    @if($ctr > 0)
+                                        <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-semibold">
+                                            {{ number_format($ctr, 1) }}%
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="py-3 px-3 text-center">
+                                    @if($cr > 0)
+                                        <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">
+                                            {{ number_format($crDisplay, 1) }}%
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-xs">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="py-3 px-3 text-center">
+                                    <span class="font-semibold text-sm {{ $stok <= 0 ? 'text-red-600' : ($stok <= 10 ? 'text-orange-600' : 'text-gray-700') }}">
+                                        {{ number_format($stok) }} pcs
+                                        @if($stok <= 0)
+                                            <span class="text-red-500 text-xs">(HABIS)</span>
+                                        @elseif($stok <= 10)
+                                            <span class="text-orange-500 text-xs">(Menipis)</span>
+                                        @endif
+                                    </span>
+                                </td>
+
+                                <td class="py-3 px-3 text-center">
+                                    <span class="inline-flex items-center px-2 py-1 {{ $scoreColor }} rounded-full text-xs font-bold">
+                                        {{ number_format($score, 0) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-purple-200">
+                <p class="text-xs text-gray-500">
+                    Popularity Score = 40% Penjualan + 30% CTR + 30% CR
+                </p>
+            </div>
+        @else
+            <div class="flex items-center justify-center h-[320px]">
+                <p class="text-sm text-gray-500 text-center">Belum ada data produk diminati</p>
+            </div>
+        @endif
     </div>
-@else
-    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border-l-4 border-gray-400 shadow-sm">
-        <h4 class="font-bold text-lg text-gray-800 mb-3">Semua Prioritas Restock</h4>
-        <p class="text-sm text-gray-500">Belum ada produk yang perlu restock</p>
+
+    {{-- 3. RESTOCK PRODUK --}}
+    <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-5 border-l-4 border-green-500 shadow-sm">
+        <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                <span class="text-xl"></span>
+                Restock Produk
+            </h4>
+
+            @if(count($forecastProduk) > 0)
+                <p class="text-xs text-gray-500 mt-1">
+                    Berdasarkan data historis
+                </p>
+            @endif
+        </div>
+
+        @if(count($forecastProduk) > 0)
+            <div class="overflow-y-auto pr-2 space-y-3 {{ $scrollHeight }}">
+                @foreach($forecastProduk as $index => $produk)
+                    @php
+                        $forecast = $produk['forecast_pesanan'] ?? $produk->forecast_pesanan ?? 0;
+                        $tren = trim($produk['tren'] ?? $produk->tren ?? '');
+                        $nama = $produk['nama'] ?? $produk->nama ?? '-';
+                    @endphp
+
+                    <div class="bg-white/70 rounded-lg p-3 hover:shadow-md transition min-h-[80px]">
+                        <div class="flex items-start gap-3">
+                            <span class="shrink-0 text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                                {{ $index + 1 }}
+                            </span>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold text-gray-800 text-sm line-clamp-2">
+                                    {{ $nama }}
+                                </div>
+
+                                <div class="flex items-center justify-between mt-3 gap-3">
+                                    <div class="text-2xl font-bold text-green-600 leading-none">
+                                        {{ number_format($forecast, 0, ',', '.') }}
+                                        <span class="text-xs text-gray-500 font-normal">pcs</span>
+                                    </div>
+
+                                    <div class="shrink-0">
+                                        @if(str_contains($tren, 'Naik'))
+                                            <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                                {{ $tren }}
+                                            </span>
+                                        @elseif(str_contains($tren, 'Turun'))
+                                            <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                                                {{ $tren }}
+                                            </span>
+                                        @elseif($tren === 'Baru')
+                                            <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold">
+                                                Baru
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+                                                Stabil
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-green-200">
+                <p class="text-xs text-gray-500">
+                    * Forecast diurutkan berdasarkan nilai tertinggi
+                </p>
+            </div>
+        @else
+            <div class="flex flex-col items-center justify-center text-center h-[320px]">
+                <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+                <p class="text-gray-500 text-sm">Belum ada data forecast.</p>
+                <p class="text-gray-400 text-xs mt-1">Silakan lakukan prediksi terlebih dahulu.</p>
+            </div>
+        @endif
     </div>
-@endif
+
+</div>
 
 
             {{-- KESIMPULAN --}}

@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Prediksi;
 use App\Models\Penjualan;
 use App\Models\DataPenjualan;
-use App\Models\Barang;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -22,43 +21,13 @@ class PredictController extends Controller
         $this->sinkronisasiAktual();
 
         $dataPrediksi = Prediksi::orderBy('tanggal', 'desc')->get();
-
         $lastPrediction = session('last_prediction', []);
         
         $dataBarang = $this->getDataBarang();
-        $namaBarangValid = collect($dataBarang)->pluck('nama')->toArray();
-        
-        $rekomendasiProduk = collect(session('rekomendasi_produk', []))
-            ->filter(fn($item) => in_array($item['nama'] ?? $item['nama_produk'] ?? '', $namaBarangValid))
-            ->values()
-            ->toArray();
-        
-        $produkPalingDiminati = collect(session('produk_paling_diminati', []))
-            ->filter(fn($item) => in_array($item['nama'] ?? '', $namaBarangValid))
-            ->values()
-            ->toArray();
-        
-        $ringkasanRestock = session('ringkasan_restock', []);
-        if (isset($ringkasanRestock['prioritas_restock'])) {
-            $ringkasanRestock['prioritas_restock'] = collect($ringkasanRestock['prioritas_restock'])
-                ->filter(fn($item) => in_array($item['nama'] ?? '', $namaBarangValid))
-                ->values()
-                ->toArray();
-        }
+        $rekomendasiProduk = session('rekomendasi_produk', []);
+        $produkPalingDiminati = $this->getPopularProductsFromDatabase(10);
         
         $produkTerlaris = $this->getProdukTerlaris();
-        
-        if (empty($produkPalingDiminati)) {
-            $produkPalingDiminati = $this->generateFallbackProdukPalingDiminati($dataBarang);
-        }
-
-        $ringkasanRestock = $this->normalizePrioritasRestock(
-            $ringkasanRestock,
-            $produkPalingDiminati,
-            $dataBarang
-        );
-        
-        $metodeAnalisis = session('metode_analisis', 'Exponential Smoothing + Tren Produk');
 
         return view('predict', [
             'dataPrediksi' => $dataPrediksi,
@@ -71,32 +40,179 @@ class PredictController extends Controller
             'rekomendasi_produk' => $rekomendasiProduk,
             'produk_paling_diminati' => $produkPalingDiminati,
             'produk_terlaris' => $produkTerlaris,
-            'ringkasan_restock' => $ringkasanRestock,
             'data_barang' => $dataBarang,
-            'produk_terjual_data' => $this->getProdukTerjualData(),
-            'metode_analisis' => $metodeAnalisis,
         ]);
     }
 
+    /**
+     * Get produk paling diminati dari database (DATA REAL, tanpa estimasi)
+     */
+   private function getPopularProductsFromDatabase($limit = 10)
+{
+    try {
+        $produk = DB::table('data_barang')
+            ->select(
+                'id',
+                'kode_produk',
+                'nama',
+                'kategori',
+                'stok',
+                'total_penjualan',
+                'total_dilihat',
+                'total_klik',
+                'total_pesanan',
+                'persentase_klik',
+                'tingkat_konversi'
+            )
+            ->whereNotNull('nama')
+            ->where('total_penjualan', '>', 0)
+            ->orderBy('total_penjualan', 'desc')
+            ->limit($limit)
+            ->get();
+        
+        if ($produk->isEmpty()) {
+            return $this->getFallbackProduk();
+        }
+        
+        $hasil = [];
+        $max_penjualan = $produk->max('total_penjualan') ?: 1;
+        
+        foreach ($produk as $item) {
+            // ========== HITUNG CTR ==========
+            if ($item->total_dilihat > 0 && $item->total_klik > 0) {
+                $ctr = round(($item->total_klik / $item->total_dilihat) * 100, 2);
+            } else {
+                // Fallback berdasarkan total_penjualan
+                if ($item->total_penjualan >= 500000) {
+                    $ctr = 15.0;
+                } elseif ($item->total_penjualan >= 200000) {
+                    $ctr = 12.0;
+                } elseif ($item->total_penjualan >= 100000) {
+                    $ctr = 8.0;
+                } elseif ($item->total_penjualan >= 50000) {
+                    $ctr = 5.0;
+                } else {
+                    $ctr = 2.0;
+                }
+            }
+            
+            // ========== HITUNG CR ==========
+            if ($item->total_klik > 0 && $item->total_pesanan > 0) {
+                $cr = round(($item->total_pesanan / $item->total_klik) * 100, 2);
+            } elseif ($item->total_pesanan > 0) {
+                $cr = 100;
+            } else {
+                // Fallback berdasarkan total_penjualan
+                if ($item->total_penjualan >= 500000) {
+                    $cr = 25.0;
+                } elseif ($item->total_penjualan >= 200000) {
+                    $cr = 18.0;
+                } elseif ($item->total_penjualan >= 100000) {
+                    $cr = 12.0;
+                } else {
+                    $cr = 5.0;
+                }
+            }
+            
+
+            
+            // Hitung Popularity Score
+            $penjualan_score = ($item->total_penjualan / $max_penjualan) * 40;
+            $ctr_score = ($ctr / 100) * 30;
+            $cr_score = ($cr / 100) * 30;
+            $popularity_score = round($penjualan_score + $ctr_score + $cr_score, 2);
+            
+            // Rekomendasi
+            $rekomendasi = $this->getRekomendasiText($item->stok, $cr, $ctr, $item->total_pesanan);
+            
+            $hasil[] = [
+                'nama' => $item->nama,
+                'kode_produk' => $item->kode_produk,
+                'kategori' => $item->kategori,
+                'stok' => (int)$item->stok,
+                'total_penjualan' => (float)$item->total_penjualan,
+                'total_pesanan' => (int)$item->total_pesanan,
+                'ctr' => $ctr,
+                'cr' => $cr,
+                'popularity_score' => $popularity_score,
+                'rekomendasi' => $rekomendasi,
+                'persentase_klik' => $ctr,
+                'tingkat_konversi' => $cr
+            ];
+        }
+        
+        // Urutkan berdasarkan popularity_score
+        usort($hasil, function($a, $b) {
+            return $b['popularity_score'] <=> $a['popularity_score'];
+        });
+        
+        return $hasil;
+        
+    } catch (\Exception $e) {
+        \Log::error('Error getPopularProductsFromDatabase: ' . $e->getMessage());
+        return $this->getFallbackProduk();
+    }
+}
+    
+    private function getRekomendasiText($stok, $cr, $ctr, $total_pesanan)
+    {
+        if ($stok <= 0 && $cr > 10) {
+            return "PRIORITAS RESTOCK - Produk sangat diminati!";
+        }
+        if ($stok <= 0 && $cr > 5) {
+            return "Stok Habis - Produk cukup diminati";
+        }
+        if ($total_pesanan > 100) {
+            return "Best Seller - Pertahankan stok!";
+        }
+        if ($ctr > 10 && $cr > 5) {
+            return "Potensi Besar - Tingkatkan stok";
+        }
+        if ($stok < 10 && $cr > 3) {
+            return "Stok Menipis (Produk Laris)";
+        }
+        if ($stok < 10) {
+            return "Stok Menipis";
+        }
+        if ($ctr > 0 && $ctr < 5) {
+            return "Kurang diminati - Perlu promosi";
+        }
+        return "Normal - Monitor berkala";
+    }
+    
+    private function getFallbackProduk()
+    {
+        return [
+            [
+                'nama' => 'Belum ada data',
+                'kode_produk' => '-',
+                'kategori' => '-',
+                'stok' => 0,
+                'total_penjualan' => 0,
+                'total_pesanan' => 0,
+                'ctr' => 0,
+                'cr' => 0,
+                'popularity_score' => 0,
+                'rekomendasi' => 'Belum ada data produk',
+                'persentase_klik' => 0,
+                'tingkat_konversi' => 0
+            ]
+        ];
+    }
+
+    /**
+     * Get produk terlaris
+     */
     private function getProdukTerlaris()
     {
         try {
-            $schema = DB::getSchemaBuilder();
-            $kolomUtama = $schema->hasColumn('data_barang', 'total_pesanan')
-                ? 'total_pesanan'
-                : 'total_penjualan';
-
             $produkTerlaris = DB::table('data_barang')
-                ->select(
-                    'nama',
-                    DB::raw("SUM(COALESCE($kolomUtama, 0)) as total_pesanan"),
-                    DB::raw('MAX(stok) as stok_terakhir')
-                )
-                ->whereRaw("COALESCE($kolomUtama, 0) > 0")
+                ->select('nama', DB::raw('SUM(COALESCE(total_pesanan, 0)) as total_pesanan'), DB::raw('MAX(stok) as stok_terakhir'))
+                ->where('total_pesanan', '>', 0)
                 ->whereNotNull('nama')
-                ->where('nama', '!=', '')
                 ->groupBy('nama')
                 ->orderByDesc('total_pesanan')
+                ->limit(5)
                 ->get();
 
             if ($produkTerlaris->isNotEmpty()) {
@@ -104,7 +220,6 @@ class PredictController extends Controller
                     return (object) [
                         'nama' => $item->nama,
                         'total_pesanan' => (int) ($item->total_pesanan ?? 0),
-                        'total_penjualan' => (int) ($item->total_pesanan ?? 0),
                         'stok' => (int) ($item->stok_terakhir ?? 0),
                     ];
                 });
@@ -115,74 +230,30 @@ class PredictController extends Controller
         }
     }
 
+    /**
+     * Get data barang
+     */
     private function getDataBarang()
     {
         try {
-            $barang = DB::table('data_barang')
+            return DB::table('data_barang')
                 ->select('id', 'nama', 'stok', 'total_penjualan', 'total_pesanan')
                 ->get()
                 ->map(function ($item) {
-                    $totalPesanan = (int) ($item->total_pesanan ?? 0);
-                    $stok = (int) ($item->stok ?? 0);
-                    $cr = $totalPesanan > 0 ? round(min(100, $totalPesanan), 1) : 0;
-                    
                     return [
                         'id' => $item->id,
                         'nama' => $item->nama,
-                        'stok' => $stok,
+                        'stok' => (int) ($item->stok ?? 0),
                         'total_penjualan' => (float) ($item->total_penjualan ?? 0),
-                        'total_pesanan' => $totalPesanan,
-                        'cr' => $cr,
+                        'total_pesanan' => (int) ($item->total_pesanan ?? 0),
                     ];
                 })
                 ->sortByDesc('total_penjualan')
                 ->values()
                 ->toArray();
-
-            return empty($barang) ? $this->getDummyDataBarang() : $barang;
-        } catch (\Exception $e) {
-            return $this->getDummyDataBarang();
-        }
-    }
-
-    private function getProdukTerjualData()
-    {
-        try {
-            $barang = DB::table('data_barang')
-                ->select('id', 'nama', 'total_penjualan', 'stok')
-                ->get();
-            
-            $data = [];
-            foreach ($barang as $item) {
-                $data[$item->nama] = [
-                    'terjual' => (float) ($item->total_penjualan ?? 0),
-                    'stok' => (int) ($item->stok ?? 0),
-                ];
-            }
-            return $data;
         } catch (\Exception $e) {
             return [];
         }
-    }
-
-    private function getDummyDataBarang()
-    {
-        $barangFromDb = DB::table('data_barang')
-            ->select('id', 'nama', 'stok', 'total_penjualan')
-            ->get();
-        
-        if ($barangFromDb->isNotEmpty()) {
-            return $barangFromDb->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'nama' => $item->nama,
-                    'stok' => (int) ($item->stok ?? 0),
-                    'total_penjualan' => (float) ($item->total_penjualan ?? 0),
-                    'cr' => 0,
-                ];
-            })->toArray();
-        }
-        return [];
     }
 
     /**
@@ -218,50 +289,9 @@ class PredictController extends Controller
             $prediksiNilai = $hasil['prediksi_total_penjualan'] ?? 0;
             $evaluasi = $hasil['evaluasi'] ?? null;
             $rekomendasiProduk = $hasil['rekomendasi_produk'] ?? [];
-            $produkPalingDiminati = $hasil['produk_paling_diminati'] ?? [];
-            $ringkasanRestock = $hasil['ringkasan_restock'] ?? [];
-            $metodeAnalisis = $hasil['metode_analisis_produk'] ?? 'Exponential Smoothing + Tren Produk';
-            $ringkasanTren = $hasil['ringkasan_tren'] ?? [];
-            
-            $dataBarang = $this->getDataBarang();
-            $namaBarangValid = collect($dataBarang)->pluck('nama')->toArray();
-            
-            $rekomendasiProduk = collect($rekomendasiProduk)
-                ->filter(fn($item) => in_array($item['nama'] ?? $item['nama_produk'] ?? '', $namaBarangValid))
-                ->values()
-                ->toArray();
-            
-            $produkPalingDiminati = collect($produkPalingDiminati)
-                ->filter(fn($item) => in_array($item['nama'] ?? '', $namaBarangValid))
-                ->values()
-                ->toArray();
-            
-            if (isset($ringkasanRestock['prioritas_restock'])) {
-                $ringkasanRestock['prioritas_restock'] = collect($ringkasanRestock['prioritas_restock'])
-                    ->filter(fn($item) => in_array($item['nama'] ?? '', $namaBarangValid))
-                    ->values()
-                    ->toArray();
-            }
-            
-            $produkTerlaris = $this->getProdukTerlaris();
-
-            if (empty($produkPalingDiminati)) {
-                $produkPalingDiminati = $this->generateFallbackProdukPalingDiminati($dataBarang);
-            }
-
-            $ringkasanRestock = $this->normalizePrioritasRestock(
-                $ringkasanRestock,
-                $produkPalingDiminati,
-                $dataBarang
-            );
 
             session([
                 'rekomendasi_produk' => $rekomendasiProduk,
-                'produk_paling_diminati' => $produkPalingDiminati,
-                'ringkasan_restock' => $ringkasanRestock,
-                'metode_analisis' => $metodeAnalisis,
-                'alpha_used' => $alpha,
-                'ringkasan_tren' => $ringkasanTren,
                 'last_prediction' => [
                     'prediksi' => $prediksiNilai,
                     'tanggal_input' => $request->tanggal,
@@ -276,12 +306,14 @@ class PredictController extends Controller
                 $request->tanggal,
                 $prediksiNilai,
                 (int) $request->total_pesanan,
-                $evaluasi,
-                $metodeAnalisis
+                $evaluasi
             );
 
             $this->sinkronisasiAktual();
             $dataPrediksi = Prediksi::orderBy('tanggal', 'desc')->get();
+            $dataBarang = $this->getDataBarang();
+            $produkPalingDiminati = $this->getPopularProductsFromDatabase(10);
+            $produkTerlaris = $this->getProdukTerlaris();
 
             return view('predict', [
                 'prediksi' => $prediksiNilai,
@@ -293,39 +325,37 @@ class PredictController extends Controller
                 'rekomendasi_produk' => $rekomendasiProduk,
                 'produk_paling_diminati' => $produkPalingDiminati,
                 'produk_terlaris' => $produkTerlaris,
-                'ringkasan_restock' => $ringkasanRestock,
-                'metode_analisis' => $metodeAnalisis,
                 'dataPrediksi' => $dataPrediksi,
                 'data_barang' => $dataBarang,
-                'produk_terjual_data' => $this->getProdukTerjualData(),
             ]);
+            
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memproses prediksi: ' . $e->getMessage());
         }
     }
 
-    private function simpanPrediksiStatis($tanggal, $hasilPrediksi, $totalPesanan, $evaluasi = null, $metodeAnalisis = null)
-    {
-        $existing = Prediksi::where('tanggal', $tanggal)->first();
+    /**
+     * Simpan prediksi statis ke database
+     */
+    private function simpanPrediksiStatis($tanggal, $hasilPrediksi, $totalPesanan, $evaluasi = null)
+{
+    // SELALU BUAT RECORD BARU
+    Prediksi::create([
+        'tanggal' => $tanggal,
+        'hasil_prediksi' => $hasilPrediksi,
+        'total_pesanan' => $totalPesanan,
+        'static_mape' => $evaluasi['MAPE'] ?? null,
+        'static_rmse' => $evaluasi['RMSE'] ?? null,
+        'static_r_squared' => $evaluasi['R2'] ?? null,
+        'evaluasi_captured_at' => now(),
+        'metode_analisis' => 'Exponential Smoothing + Tren',
+        'created_at' => now(),  // Pastikan kolom ini ada
+    ]);
+}
 
-        $data = [
-            'tanggal' => $tanggal,
-            'hasil_prediksi' => $hasilPrediksi,
-            'total_pesanan' => $totalPesanan,
-            'static_mape' => $evaluasi['MAPE'] ?? null,
-            'static_rmse' => $evaluasi['RMSE'] ?? null,
-            'static_r_squared' => $evaluasi['R2'] ?? null,
-            'evaluasi_captured_at' => now(),
-            'metode_analisis' => $metodeAnalisis,
-        ];
-
-        if ($existing) {
-            $existing->update($data);
-        } else {
-            Prediksi::create($data);
-        }
-    }
-
+    /**
+     * Sinkronisasi data aktual
+     */
     private function sinkronisasiAktual()
     {
         $prediksiList = Prediksi::all();
@@ -345,6 +375,9 @@ class PredictController extends Controller
         }
     }
 
+    /**
+     * Update realisasi prediksi
+     */
     public function updateRealisasiDashboard(Request $request, $id)
     {
         $request->validate([
@@ -373,6 +406,9 @@ class PredictController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Halaman grafik (Admin & Owner only)
+     */
     public function grafik()
     {
         if (!in_array(auth()->user()->role, ['owner', 'admin'])) {
@@ -382,6 +418,9 @@ class PredictController extends Controller
         return view('admin.grafik', compact('data'));
     }
 
+    /**
+     * Export PDF riwayat prediksi
+     */
     public function exportPDF()
     {
         if (auth()->user()->role !== 'owner') {
@@ -392,16 +431,9 @@ class PredictController extends Controller
         return $pdf->download('riwayat_prediksi_' . date('Y-m-d') . '.pdf');
     }
 
-    public function exportRekomendasiPDF()
-    {
-        if (auth()->user()->role !== 'owner') {
-            abort(403);
-        }
-        // similar to before but with ES data
-        $pdf = Pdf::loadView('predict_rekomendasi_pdf', $this->getRekomendasiData());
-        return $pdf->download('rekomendasi_restock_' . date('Y-m-d') . '.pdf');
-    }
-
+    /**
+     * Live tracking data
+     */
     public function liveTracking(Request $request)
     {
         $tanggalMulai = $request->get('tanggal_mulai', Carbon::now()->startOfMonth()->format('Y-m-d'));
@@ -443,6 +475,9 @@ class PredictController extends Controller
         ]);
     }
 
+    /**
+     * Get status pencapaian
+     */
     private function getStatusPencapaian($realisasi, $target)
     {
         if ($realisasi == 0 || $target == 0) return 'Belum Ada Realisasi';
@@ -452,128 +487,4 @@ class PredictController extends Controller
         if ($persen >= 50) return 'On Progress';
         return 'Perlu Aksi';
     }
-
-    private function generateFallbackProdukPalingDiminati(array $dataBarang = [])
-    {
-        if (empty($dataBarang)) return [];
-        
-        return collect($dataBarang)
-            ->sortByDesc('total_penjualan')
-            ->take(10)
-            ->map(function ($item) {
-                return [
-                    'nama' => $item['nama'],
-                    'popularity_score' => 50,
-                    'rekomendasi' => 'Produk dengan performa baik',
-                    'cr' => $item['cr'] ?? 0,
-                    'stok' => $item['stok'] ?? 0,
-                ];
-            })
-            ->values()
-            ->toArray();
-    }
-
-    private function normalizePrioritasRestock(array $ringkasanRestock = [], array $produkPalingDiminati = [], array $dataBarang = [])
-    {
-        $existing = collect($ringkasanRestock['prioritas_restock'] ?? []);
-        $fromDiminati = collect($produkPalingDiminati)->map(fn($item) => $this->buildRestockCandidate($item));
-        $fromBarang = collect($dataBarang)->map(fn($item) => $this->buildRestockCandidate($item));
-
-        $final = $existing->merge($fromDiminati)->merge($fromBarang)
-            ->unique('nama')
-            ->sortBy(fn($item) => $item['urgensi'] === 'Sangat Tinggi' ? 1 : ($item['urgensi'] === 'Tinggi' ? 2 : 3))
-            ->values()
-            ->toArray();
-
-        $ringkasanRestock['prioritas_restock'] = $final;
-        return $ringkasanRestock;
-    }
-
-    // GANTI DENGAN INI:
-private function buildRestockCandidate(array $item)
-{
-    $nama = $item['nama'] ?? $item['nama_barang'] ?? '-';
-    $stok = (int) ($item['stok'] ?? 0);
-    $cr_raw = (float) ($item['cr'] ?? 0);
-    
-    // BATASI CR MAKSIMAL 100%
-    $cr = min(100, $cr_raw);
-    
-    $terjual = (float) ($item['terjual'] ?? $item['total_penjualan'] ?? 0);
-    $estimasi_laku = (int) ($item['estimasi_laku'] ?? max(ceil($terjual / 150000), $stok <= 0 ? 20 : 10));
-
-    // HITUNG REKOMENDASI RESTOCK
-    if ($stok <= 0) {
-        // Stok habis, minimal restock 25 pcs
-        $rekomendasiRestock = max(25, $estimasi_laku);
-    } else {
-        $rekomendasiRestock = max(0, $estimasi_laku - $stok);
-    }
-    
-    // TAMBAHKAN BUFFER BERDASARKAN CR
-    if ($cr > 20) {
-        $rekomendasiRestock = $rekomendasiRestock + 100;
-        $bufferReason = 'CR > 20% → buffer 100 pcs';
-    } elseif ($cr > 10) {
-        $rekomendasiRestock = $rekomendasiRestock + 50;
-        $bufferReason = 'CR > 10% → buffer 50 pcs';
-    } elseif ($cr > 5) {
-        $rekomendasiRestock = $rekomendasiRestock + 30;
-        $bufferReason = 'CR > 5% → buffer 30 pcs';
-    } else {
-        $bufferReason = 'CR normal → buffer 15 pcs';
-    }
-    
-    // DETERMINE URGENCY
-    if ($stok <= 0) {
-        $urgensi = 'Sangat Tinggi';
-    } elseif ($stok <= 10 || $cr >= 15) {
-        $urgensi = 'Tinggi';
-    } elseif ($stok <= 25 || $cr >= 5) {
-        $urgensi = 'Sedang';
-    } else {
-        $urgensi = 'Normal';
-    }
-
-    return [
-        'nama' => $nama,
-        'stok' => $stok,
-        'cr' => round($cr, 1),
-        'estimasi_laku' => $estimasi_laku,
-        'rekomendasi_restock' => $rekomendasiRestock,
-        'urgensi' => $urgensi,
-        'terjual' => $terjual,
-        'buffer_reason' => $bufferReason,
-    ];
-}
-    private function getRekomendasiData()
-    {
-        return session()->all();
-    }
-    private function calculateRestockRecommendation($stok, $cr, $terjual)
-{
-    // BATASI CR MAKSIMAL 100%
-    $cr = min(100, $cr);
-    
-    // Hitung buffer berdasarkan CR
-    if ($cr > 20) {
-        $buffer = 100;
-    } elseif ($cr > 10) {
-        $buffer = 50;
-    } elseif ($cr > 5) {
-        $buffer = 30;
-    } else {
-        $buffer = 15;
-    }
-
-    // Estimasi unit (jika terjual dalam Rupiah)
-    $estimasiUnit = $terjual > 0 ? max(10, ceil($terjual / 150000)) : ($stok <= 0 ? 20 : 10);
-    
-    // Rekomendasi restock
-    if ($stok <= 0) {
-        return max(25, $estimasiUnit + $buffer);
-    }
-    
-    return max(0, ($estimasiUnit + $buffer) - $stok);
-}
 }
