@@ -418,29 +418,76 @@ class PredictController extends Controller
         return view('admin.grafik', compact('data'));
     }
 
-    /**
- * Export PDF riwayat prediksi
- */
-public function exportPDF()
+  public function exportPDF()
 {
     if (auth()->user()->role !== 'owner') {
         abort(403);
     }
     
-    $dataPrediksi = Prediksi::orderBy('tanggal', 'asc')->get();
+    // Ambil data langsung dari database
+    $dataPrediksi = DB::table('prediksis')
+        ->select(
+            'id',
+            'tanggal',
+            'hasil_prediksi',
+            'total_pesanan',
+            'penjualan_aktual',
+            'error',
+            'mape',
+            'static_mape',
+            'rmse',
+            'static_rmse',
+            'r_squared',
+            'static_r_squared',
+            'created_at'
+        )
+        ->orderBy('tanggal', 'asc')
+        ->get();
     
-    // Hitung ringkasan
+    // Hitung total
     $totalPrediksi = $dataPrediksi->sum('hasil_prediksi');
     $totalAktual = $dataPrediksi->sum('penjualan_aktual');
     
-    // Hitung rata-rata evaluasi (hanya data yang sudah ada aktualnya)
-    $dataDenganAktual = $dataPrediksi->filter(function($item) {
-        return !is_null($item->penjualan_aktual) && $item->penjualan_aktual > 0;
-    });
+    // Hitung rata-rata MAPE (prioritaskan kolom mape)
+    $mapes = [];
+    foreach ($dataPrediksi as $item) {
+        $nilai = $item->mape ?? $item->static_mape ?? null;
+        if ($nilai !== null && $nilai > 0) {
+            $mapes[] = $nilai;
+        }
+    }
+    $rataMape = !empty($mapes) ? array_sum($mapes) / count($mapes) : 0;
     
-    $rataMape = $dataDenganAktual->avg('static_mape');
-    $rataRmse = $dataDenganAktual->avg('static_rmse');
-    $rataR2 = $dataDenganAktual->avg('static_r_squared');
+    // Hitung rata-rata RMSE
+    $rmses = [];
+    foreach ($dataPrediksi as $item) {
+        $nilai = $item->rmse ?? $item->static_rmse ?? null;
+        if ($nilai !== null && $nilai > 0) {
+            $rmses[] = $nilai;
+        }
+    }
+    $rataRmse = !empty($rmses) ? array_sum($rmses) / count($rmses) : 0;
+    
+    // Hitung rata-rata R²
+    $r2s = [];
+    foreach ($dataPrediksi as $item) {
+        $nilai = $item->r_squared ?? $item->static_r_squared ?? null;
+        if ($nilai !== null && $nilai > 0) {
+            $r2s[] = $nilai;
+        }
+    }
+    $rataR2 = !empty($r2s) ? array_sum($r2s) / count($r2s) : 0;
+    
+    // Debug ke log (opsional)
+    \Log::info('PDF Export - Data:', [
+        'total_prediksi' => $totalPrediksi,
+        'total_aktual' => $totalAktual,
+        'rata_mape' => $rataMape,
+        'rata_rmse' => $rataRmse,
+        'rata_r2' => $rataR2,
+        'jumlah_data' => $dataPrediksi->count(),
+        'jumlah_mape' => count($mapes),
+    ]);
     
     // Generate chart
     $chartBase64 = $this->generateChart($dataPrediksi);
@@ -459,7 +506,6 @@ public function exportPDF()
     
     return $pdf->download('riwayat_prediksi_' . date('Y-m-d_H-i-s') . '.pdf');
 }
-
     /**
      * Live tracking data
      */

@@ -123,24 +123,10 @@
             background: #f8f9fb;
         }
 
-        .green {
-            color: #166534;
-            font-weight: bold;
-        }
-
-        .orange {
-            color: #b45309;
-            font-weight: bold;
-        }
-
-        .red {
-            color: #b91c1c;
-            font-weight: bold;
-        }
-
-        .muted {
-            color: #6b7280;
-        }
+        .green { color: #166534; font-weight: bold; }
+        .orange { color: #b45309; font-weight: bold; }
+        .red { color: #b91c1c; font-weight: bold; }
+        .muted { color: #6b7280; }
 
         .footer-note {
             border-top: 1px solid #d7dbe2;
@@ -152,13 +138,8 @@
             line-height: 1.5;
         }
 
-        .status-cell {
-            white-space: nowrap;
-        }
-
-        .small {
-            font-size: 9px;
-        }
+        .status-cell { white-space: nowrap; }
+        .small { font-size: 9px; }
 
         .w-no { width: 4%; }
         .w-tanggal { width: 12%; }
@@ -194,26 +175,44 @@
                 </td>
                 <td>
                     <div class="summary-label">Rata-rata MAPE</div>
-                    <div class="summary-value">{{ number_format($rataMape ?? 0, 2, '.', '.') }}%</div>
+                    <div class="summary-value">
+                        @if(($rataMape ?? 0) > 0)
+                            {{ number_format($rataMape, 2, '.', '.') }}%
+                        @else
+                            0%
+                        @endif
+                    </div>
                 </td>
                 <td>
                     <div class="summary-label">Rata-rata RMSE</div>
-                    <div class="summary-value">Rp {{ number_format($rataRmse ?? 0, 0, ',', '.') }}</div>
+                    <div class="summary-value">
+                        @if(($rataRmse ?? 0) > 0)
+                            Rp {{ number_format($rataRmse, 0, ',', '.') }}
+                        @else
+                            Rp 0
+                        @endif
+                    </div>
                 </td>
                 <td>
                     <div class="summary-label">Rata-rata R²</div>
-                    <div class="summary-value">{{ number_format($rataR2 ?? 0, 4, '.', '.') }}</div>
+                    <div class="summary-value">
+                        @if(($rataR2 ?? 0) > 0)
+                            {{ number_format($rataR2, 4, '.', '.') }}
+                        @else
+                            0
+                        @endif
+                    </div>
                 </td>
             </tr>
         </table>
 
-       {{-- Grafik --}}
-@if(!empty($chartBase64))
-<div class="section-title">Grafik Prediksi vs Aktual</div>
-<div class="chart-wrap">
-    <img src="{{ $chartBase64 }}" alt="Grafik Prediksi vs Aktual">
-</div>
-@endif
+        {{-- Grafik --}}
+        @if(!empty($chartBase64))
+        <div class="section-title">Grafik Prediksi vs Aktual</div>
+        <div class="chart-wrap">
+            <img src="{{ $chartBase64 }}" alt="Grafik Prediksi vs Aktual">
+        </div>
+        @endif
 
         {{-- Tabel Detail --}}
         <table class="data-table">
@@ -244,7 +243,6 @@
                             $statusIcon = '◷';
                         } else {
                             $persen = ($aktual / $prediksi) * 100;
-
                             if ($persen >= 100) {
                                 $status = 'Tercapai';
                                 $statusClass = 'green';
@@ -260,28 +258,45 @@
                             }
                         }
                     @endphp
-
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">
-                            {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}
-                        </td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
                         <td class="text-center">{{ $item->total_pesanan ?? 0 }}</td>
                         <td class="text-right">Rp {{ number_format($prediksi, 0, ',', '.') }}</td>
                         <td class="text-right">
-                            {{ !is_null($aktual) ? 'Rp ' . number_format($aktual, 0, ',', '.') : '-' }}
+                            @if(!is_null($aktual))
+                                Rp {{ number_format($aktual, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
                         </td>
                         <td class="text-right">
-                            {{ !is_null($error) ? 'Rp ' . number_format($error, 0, ',', '.') : '-' }}
+                            @if(!is_null($error))
+                                Rp {{ number_format($error, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
                         </td>
-                        <td class="text-center {{ !is_null($item->static_mape) ? 'green' : '' }}">
-                            {{ !is_null($item->static_mape) ? number_format($item->static_mape, 2, '.', '.') . '%' : '-' }}
+                        <td class="text-center">
+                            @if(!is_null($item->mape) && $item->mape > 0)
+                                <span class="green">{{ number_format($item->mape, 2, '.', '.') }}%</span>
+                            @else
+                                <span class="muted">-</span>
+                            @endif
                         </td>
                         <td class="text-right">
-                            {{ !is_null($item->static_rmse) ? 'Rp ' . number_format($item->static_rmse, 0, ',', '.') : '-' }}
+                            @if(!is_null($item->rmse) && $item->rmse > 0)
+                                <span class="green">Rp {{ number_format($item->rmse, 0, ',', '.') }}</span>
+                            @else
+                                <span class="muted">-</span>
+                            @endif
                         </td>
-                        <td class="text-center {{ !is_null($item->static_r_squared) ? 'green' : '' }}">
-                            {{ !is_null($item->static_r_squared) ? number_format($item->static_r_squared, 4, '.', '.') : '-' }}
+                        <td class="text-center">
+                            @if(!is_null($item->r_squared) && $item->r_squared > 0)
+                                <span class="green">{{ number_format($item->r_squared, 4, '.', '.') }}</span>
+                            @else
+                                <span class="muted">-</span>
+                            @endif
                         </td>
                         <td class="text-left status-cell {{ $statusClass }}">
                             {{ $statusIcon }} {{ $status }}
