@@ -419,17 +419,46 @@ class PredictController extends Controller
     }
 
     /**
-     * Export PDF riwayat prediksi
-     */
-    public function exportPDF()
-    {
-        if (auth()->user()->role !== 'owner') {
-            abort(403);
-        }
-        $dataPrediksi = Prediksi::orderBy('tanggal', 'asc')->get();
-        $pdf = Pdf::loadView('predict_pdf', compact('dataPrediksi'));
-        return $pdf->download('riwayat_prediksi_' . date('Y-m-d') . '.pdf');
+ * Export PDF riwayat prediksi
+ */
+public function exportPDF()
+{
+    if (auth()->user()->role !== 'owner') {
+        abort(403);
     }
+    
+    $dataPrediksi = Prediksi::orderBy('tanggal', 'asc')->get();
+    
+    // Hitung ringkasan
+    $totalPrediksi = $dataPrediksi->sum('hasil_prediksi');
+    $totalAktual = $dataPrediksi->sum('penjualan_aktual');
+    
+    // Hitung rata-rata evaluasi (hanya data yang sudah ada aktualnya)
+    $dataDenganAktual = $dataPrediksi->filter(function($item) {
+        return !is_null($item->penjualan_aktual) && $item->penjualan_aktual > 0;
+    });
+    
+    $rataMape = $dataDenganAktual->avg('static_mape');
+    $rataRmse = $dataDenganAktual->avg('static_rmse');
+    $rataR2 = $dataDenganAktual->avg('static_r_squared');
+    
+    // Generate chart
+    $chartBase64 = $this->generateChart($dataPrediksi);
+    
+    $pdf = Pdf::loadView('predict_pdf', [
+        'dataPrediksi' => $dataPrediksi,
+        'totalPrediksi' => $totalPrediksi,
+        'totalAktual' => $totalAktual,
+        'rataMape' => $rataMape,
+        'rataRmse' => $rataRmse,
+        'rataR2' => $rataR2,
+        'chartBase64' => $chartBase64,
+    ]);
+    
+    $pdf->setPaper('a4', 'landscape');
+    
+    return $pdf->download('riwayat_prediksi_' . date('Y-m-d_H-i-s') . '.pdf');
+}
 
     /**
      * Live tracking data
@@ -487,4 +516,65 @@ class PredictController extends Controller
         if ($persen >= 50) return 'On Progress';
         return 'Perlu Aksi';
     }
+    /**
+ * Generate chart untuk PDF
+ */
+private function generateChart($dataPrediksi)
+{
+    try {
+        $labels = [];
+        $prediksiData = [];
+        $aktualData = [];
+        
+        foreach ($dataPrediksi as $item) {
+            $labels[] = \Carbon\Carbon::parse($item->tanggal)->format('d/m');
+            $prediksiData[] = round($item->hasil_prediksi / 1000, 0);
+            $aktualData[] = !is_null($item->penjualan_aktual) ? round($item->penjualan_aktual / 1000, 0) : 0;
+        }
+        
+        // Gunakan quickchart.io untuk generate chart
+        $chartUrl = "https://quickchart.io/chart?c=" . urlencode(json_encode([
+            'type' => 'line',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => [
+                    [
+                        'label' => 'Prediksi',
+                        'data' => $prediksiData,
+                        'borderColor' => '#3b82f6',
+                        'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
+                        'fill' => true,
+                        'tension' => 0.3,
+                    ],
+                    [
+                        'label' => 'Aktual',
+                        'data' => $aktualData,
+                        'borderColor' => '#10b981',
+                        'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
+                        'fill' => true,
+                        'tension' => 0.3,
+                    ]
+                ]
+            ],
+            'options' => [
+                'responsive' => true,
+                'plugins' => [
+                    'legend' => ['position' => 'top'],
+                    'title' => ['display' => true, 'text' => 'Grafik Prediksi vs Aktual (Dalam Ribuan Rp)']
+                ],
+                'scales' => [
+                    'y' => ['title' => ['display' => true, 'text' => 'Nilai (000 Rp)']],
+                    'x' => ['title' => ['display' => true, 'text' => 'Tanggal']]
+                ]
+            ]
+        ]));
+        
+        $chartImage = file_get_contents($chartUrl);
+        return 'data:image/png;base64,' . base64_encode($chartImage);
+        
+    } catch (\Exception $e) {
+        \Log::error('Gagal generate chart: ' . $e->getMessage());
+        return null;
+    }
+}
 }

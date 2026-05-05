@@ -207,15 +207,13 @@
             </tr>
         </table>
 
-        {{-- Grafik --}}
-        <div class="section-title">Grafik Prediksi vs Aktual</div>
-        <div class="chart-wrap">
-            @if(!empty($chartBase64))
-                <img src="{{ $chartBase64 }}" alt="Grafik Prediksi vs Aktual">
-            @else
-                <div class="muted">Grafik tidak tersedia</div>
-            @endif
-        </div>
+       {{-- Grafik --}}
+@if(!empty($chartBase64))
+<div class="section-title">Grafik Prediksi vs Aktual</div>
+<div class="chart-wrap">
+    <img src="{{ $chartBase64 }}" alt="Grafik Prediksi vs Aktual">
+</div>
+@endif
 
         {{-- Tabel Detail --}}
         <table class="data-table">
