@@ -300,9 +300,9 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
                     <label class="block text-sm font-medium text-gray-700 mb-2">Filter Status</label>
                     <select name="status_produk" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Status</option>
-                        <option value="Active" {{ request('status_produk') == 'Normal' ? 'selected' : '' }}>Normal</option>
-                        <option value="Inactive" {{ request('status_produk') == 'Diblokir' ? 'selected' : '' }}>Diblokir</option>
-                        <option value="Draft" {{ request('status_produk') == 'Diarsipkan' ? 'selected' : '' }}>Diarsipkan</option>
+                        <option value="Normal" {{ request('status_produk') == 'Normal' ? 'selected' : '' }}>Normal</option>
+                        <option value="Diblokir" {{ request('status_produk') == 'Diblokir' ? 'selected' : '' }}>Diblokir</option>
+                        <option value="Diarsipkan" {{ request('status_produk') == 'Diarsipkan' ? 'selected' : '' }}>Diarsipkan</option>
                     </select>
                 </div>
             </div>

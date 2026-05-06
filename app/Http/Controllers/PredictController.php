@@ -418,13 +418,13 @@ class PredictController extends Controller
         return view('admin.grafik', compact('data'));
     }
 
-  public function exportPDF()
+ public function exportPDF()
 {
     if (auth()->user()->role !== 'owner') {
         abort(403);
     }
     
-    // Ambil data langsung dari database
+    // Ambil data
     $dataPrediksi = DB::table('prediksis')
         ->select(
             'id',
@@ -433,12 +433,13 @@ class PredictController extends Controller
             'total_pesanan',
             'penjualan_aktual',
             'error',
+            'static_error',
             'mape',
-            'static_mape',
+            'static_mape',      // ← Gunakan ini
             'rmse',
-            'static_rmse',
+            'static_rmse',      // ← Gunakan ini
             'r_squared',
-            'static_r_squared',
+            'static_r_squared', // ← Gunakan ini
             'created_at'
         )
         ->orderBy('tanggal', 'asc')
@@ -448,11 +449,12 @@ class PredictController extends Controller
     $totalPrediksi = $dataPrediksi->sum('hasil_prediksi');
     $totalAktual = $dataPrediksi->sum('penjualan_aktual');
     
-    // Hitung rata-rata MAPE (prioritaskan kolom mape)
+    // Hitung rata-rata MAPE (prioritaskan static_mape)
     $mapes = [];
     foreach ($dataPrediksi as $item) {
+        // Gunakan static_mape jika mape null
         $nilai = $item->mape ?? $item->static_mape ?? null;
-        if ($nilai !== null && $nilai > 0) {
+        if ($nilai !== null) {
             $mapes[] = $nilai;
         }
     }
@@ -461,8 +463,9 @@ class PredictController extends Controller
     // Hitung rata-rata RMSE
     $rmses = [];
     foreach ($dataPrediksi as $item) {
+        // Gunakan static_rmse jika rmse null
         $nilai = $item->rmse ?? $item->static_rmse ?? null;
-        if ($nilai !== null && $nilai > 0) {
+        if ($nilai !== null) {
             $rmses[] = $nilai;
         }
     }
@@ -471,23 +474,13 @@ class PredictController extends Controller
     // Hitung rata-rata R²
     $r2s = [];
     foreach ($dataPrediksi as $item) {
+        // Gunakan static_r_squared jika r_squared null
         $nilai = $item->r_squared ?? $item->static_r_squared ?? null;
-        if ($nilai !== null && $nilai > 0) {
+        if ($nilai !== null) {
             $r2s[] = $nilai;
         }
     }
     $rataR2 = !empty($r2s) ? array_sum($r2s) / count($r2s) : 0;
-    
-    // Debug ke log (opsional)
-    \Log::info('PDF Export - Data:', [
-        'total_prediksi' => $totalPrediksi,
-        'total_aktual' => $totalAktual,
-        'rata_mape' => $rataMape,
-        'rata_rmse' => $rataRmse,
-        'rata_r2' => $rataR2,
-        'jumlah_data' => $dataPrediksi->count(),
-        'jumlah_mape' => count($mapes),
-    ]);
     
     // Generate chart
     $chartBase64 = $this->generateChart($dataPrediksi);

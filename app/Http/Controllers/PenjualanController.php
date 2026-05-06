@@ -109,45 +109,43 @@ class PenjualanController extends Controller
         return view('data_penjualan.create');
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tanggal' => 'required|date|unique:data_penjualan,tanggal',
-            'total_penjualan' => 'required|numeric|min:0',
-            'total_pesanan' => 'required|integer|min:0',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'tanggal' => 'required|string',
+        'total_penjualan' => 'required|string', // biarkan string dulu
+        'total_pesanan' => 'required|integer|min:0',
+    ]);
 
-        $existing = Penjualan::whereDate('tanggal', $request->tanggal)->first();
-        
-        if ($existing) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Data penjualan untuk tanggal ' . $request->tanggal . ' sudah ada!');
-        }
-
-        $tanggal = Carbon::parse($request->tanggal);
-        
-        try {
-            Penjualan::create([
-                'tanggal' => $request->tanggal,
-                'total_penjualan' => $this->cleanNumber($request->total_penjualan),
-                'total_pesanan' => (int) $request->total_pesanan,
-                'hari_dalam_minggu' => $tanggal->dayOfWeek,
-                'weekend' => $tanggal->isWeekend() ? 1 : 0,
-                'bulan' => $tanggal->month,
-                'tahun' => $tanggal->year,
-            ]);
-
-            return redirect()
-                ->route('data_penjualan.index')
-                ->with('success', 'Data penjualan berhasil ditambahkan');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
-        }
+    // Parse tanggal Indonesia
+    $tanggalParsed = $this->parseIndonesianDate($request->tanggal);
+    if (!$tanggalParsed) {
+        return back()->withInput()->with('error', 'Format tanggal tidak valid (contoh: 22 Maret 2026)');
     }
+
+    // Cek unique
+    $existing = Penjualan::whereDate('tanggal', $tanggalParsed)->first();
+    if ($existing) {
+        return back()->withInput()->with('error', 'Data untuk tanggal ' . $request->tanggal . ' sudah ada');
+    }
+
+    // Bersihkan nominal
+    $totalPenjualanBersih = $this->cleanNumber($request->total_penjualan);
+
+    $tanggal = Carbon::parse($tanggalParsed);
+
+    Penjualan::create([
+        'tanggal' => $tanggalParsed,
+        'total_penjualan' => $totalPenjualanBersih,
+        'total_pesanan' => $request->total_pesanan,
+        'hari_dalam_minggu' => $tanggal->dayOfWeek,
+        'weekend' => $tanggal->isWeekend() ? 1 : 0,
+        'bulan' => $tanggal->month,
+        'tahun' => $tanggal->year,
+    ]);
+
+    return redirect()->route('data_penjualan.index')->with('success', 'Data berhasil ditambahkan');
+}
 
     public function edit($tanggal)
     {
@@ -161,7 +159,7 @@ class PenjualanController extends Controller
         
         $request->validate([
             'tanggal' => 'required|date|unique:data_penjualan,tanggal,' . $tanggal . ',tanggal',
-            'total_penjualan' => 'required|numeric|min:0',
+            'total_penjualan' => 'required|string',
             'total_pesanan' => 'required|integer|min:0',
         ]);
 
@@ -287,12 +285,9 @@ class PenjualanController extends Controller
         }
     }
 
-    private function cleanNumber($number)
-    {
-        if (is_string($number)) {
-            $number = str_replace('.', '', $number);
-            $number = str_replace(',', '.', $number);
-        }
-        return (int) filter_var($number, FILTER_SANITIZE_NUMBER_INT);
-    }
+   private function cleanNumber($number)
+{
+    // Hanya ambil digit 0-9, buang semua karakter lain
+    return (int) preg_replace('/[^0-9]/', '', $number);
+}
 }

@@ -277,27 +277,43 @@
                                 -
                             @endif
                         </td>
-                        <td class="text-center">
-                            @if(!is_null($item->mape) && $item->mape > 0)
-                                <span class="green">{{ number_format($item->mape, 2, '.', '.') }}%</span>
-                            @else
-                                <span class="muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-right">
-                            @if(!is_null($item->rmse) && $item->rmse > 0)
-                                <span class="green">Rp {{ number_format($item->rmse, 0, ',', '.') }}</span>
-                            @else
-                                <span class="muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            @if(!is_null($item->r_squared) && $item->r_squared > 0)
-                                <span class="green">{{ number_format($item->r_squared, 4, '.', '.') }}</span>
-                            @else
-                                <span class="muted">-</span>
-                            @endif
-                        </td>
+                        {{-- MAPE --}}
+<td class="text-center">
+    @php
+        $nilaiMape = $item->mape ?? $item->static_mape ?? null;
+    @endphp
+    @if(!is_null($nilaiMape))
+        <span class="{{ $nilaiMape < 30 ? 'green' : 'orange' }}">
+            {{ number_format($nilaiMape, 2, '.', '.') }}%
+        </span>
+    @else
+        <span class="muted">-</span>
+    @endif
+</td>
+
+{{-- RMSE --}}
+<td class="text-right">
+    @php
+        $nilaiRmse = $item->rmse ?? $item->static_rmse ?? null;
+    @endphp
+    @if(!is_null($nilaiRmse))
+        <span class="green">Rp {{ number_format($nilaiRmse, 0, ',', '.') }}</span>
+    @else
+        <span class="muted">-</span>
+    @endif
+</td>
+
+{{-- R² --}}
+<td class="text-center">
+    @php
+        $nilaiR2 = $item->r_squared ?? $item->static_r_squared ?? null;
+    @endphp
+    @if(!is_null($nilaiR2))
+        <span class="green">{{ number_format($nilaiR2, 4, '.', '.') }}</span>
+    @else
+        <span class="muted">-</span>
+    @endif
+</td>
                         <td class="text-left status-cell {{ $statusClass }}">
                             {{ $statusIcon }} {{ $status }}
                         </td>
