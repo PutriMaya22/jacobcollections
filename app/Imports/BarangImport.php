@@ -45,6 +45,9 @@ class BarangImport
                 'total_dilihat' => $this->findColumn($header, ['Jumlah Produk Dilihat', 'Dilihat', 'total_dilihat']),
                 'total_klik' => $this->findColumn($header, ['Produk Diklik', 'Diklik', 'Klik', 'total_klik']),
                 'total_pesanan' => $this->findColumn($header, ['Total Pesanan', 'Pesanan', 'total_pesanan']),
+                // 🔥 FIELD BARU - LANGSUNG AMBIL DARI EXCEL
+                'persentase_klik' => $this->findColumn($header, ['Persentase Klik', 'persentase_klik', 'CTR', 'Click Rate']),
+                'tingkat_konversi' => $this->findColumn($header, ['Tingkat Konversi Pesanan', 'tingkat_konversi', 'Konversi', 'Conversion Rate', 'CR']),
             ];
             
             Log::info('Mapping kolom: ' . json_encode($mapping));
@@ -73,7 +76,7 @@ class BarangImport
                         continue;
                     }
                     
-                    // 🔥 Ambil status dari Excel (SEMUA STATUS DITERIMA)
+                    // Ambil status dari Excel
                     $statusProduk = 'Normal';
                     if ($mapping['status_produk'] !== false && isset($row[$mapping['status_produk']])) {
                         $statusRaw = trim($row[$mapping['status_produk']]);
@@ -82,10 +85,14 @@ class BarangImport
                         }
                     }
                     
-                    // 🔥 Tentukan kategori berdasarkan nama
+                    // Tentukan kategori berdasarkan nama
                     $kategori = $this->determineCategory($nama);
                     
-                    // 🔥 DATA LENGKAP
+                    // 🔥 AMBIL LANGSUNG NILAI DARI EXCEL (TIDAK DIHITUNG)
+                    $persentaseKlik = $this->parsePercentage($row, $mapping['persentase_klik']);
+                    $tingkatKonversi = $this->parsePercentage($row, $mapping['tingkat_konversi']);
+                    
+                    // DATA LENGKAP
                     $data = [
                         'kode_produk' => $kodeProduk,
                         'nama' => $nama,
@@ -95,20 +102,19 @@ class BarangImport
                         'total_dilihat' => $this->parseNumber($row, $mapping['total_dilihat']),
                         'total_klik' => $this->parseNumber($row, $mapping['total_klik']),
                         'total_pesanan' => $this->parseNumber($row, $mapping['total_pesanan']),
+                        'persentase_klik' => $persentaseKlik,
+                        'tingkat_konversi' => $tingkatKonversi,
                         'tanggal_penjualan' => $this->tanggalPenjualan,
                         'stok' => 0,
-                        'persentase_klik' => 0,
-                        'tingkat_konversi' => 0,
-                        'penjualan_per_pesanan' => 0,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
                     
-                    // 🔥 INSERT DATA (LANGSUNG CREATE, TIDAK CEK DUPLIKAT)
+                    // INSERT DATA
                     Barang::create($data);
                     $this->successCount++;
                     
-                    Log::info("✅ Import baris " . ($index + 2) . ": {$kodeProduk} - {$nama} - Status: {$statusProduk}");
+                    Log::info("✅ Import baris " . ($index + 2) . ": {$kodeProduk} - {$nama} - CTR: {$persentaseKlik}% - Konversi: {$tingkatKonversi}%");
                     
                 } catch (\Exception $e) {
                     $this->failedCount++;
@@ -154,6 +160,31 @@ class BarangImport
         $value = preg_replace('/[^0-9\-]/', '', $value);
         
         return is_numeric($value) ? (int) $value : 0;
+    }
+    
+    /**
+     * 🔥 PARSING PERSENTASE DARI EXCEL
+     * Contoh: "4,64%" atau "4.64%" atau "4.64" → 4.64
+     */
+    private function parsePercentage($row, $columnIndex)
+    {
+        if ($columnIndex === false || !isset($row[$columnIndex])) {
+            return 0;
+        }
+        
+        $value = trim($row[$columnIndex]);
+        if (empty($value)) return 0;
+        
+        // Hapus tanda persen
+        $value = str_replace('%', '', $value);
+        
+        // Ganti koma dengan titik (format Indonesia)
+        $value = str_replace(',', '.', $value);
+        
+        // Hapus karakter selain angka, titik, minus
+        $value = preg_replace('/[^0-9.\-]/', '', $value);
+        
+        return is_numeric($value) ? (float) $value : 0;
     }
     
     private function determineCategory($nama)
