@@ -765,25 +765,6 @@
         @endif
     @endauth
 
-    {{-- INFO JIKA BELUM ADA PREDIKSI --}}
-    @if(!isset($prediksi))
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 text-center">
-            <div class="text-6xl mb-4">📊</div>
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Siap Memulai Prediksi?</h3>
-            <p class="text-gray-500 max-w-md mx-auto">Masukkan total pesanan dan tanggal untuk mendapatkan prediksi penjualan serta rekomendasi produk terlaris, paling diminati, dan prediksi restock.</p>
-            <p class="text-sm text-blue-600 mt-3">Restok akan disesuaikan dengan data historis 90 hari terakhir!</p>
-            @auth
-                @if(auth()->user()->role === 'owner')
-                    <p class="text-sm text-green-600 mt-2">✨ Isi form di atas untuk memulai prediksi</p>
-                @else
-                    <p class="text-sm text-yellow-600 mt-2">Hanya owner yang dapat melakukan prediksi baru</p>
-                @endif
-            @endauth
-        </div>
-    @endif
-
-</div>
-
 <script>
     // Loading effect saat submit form
     document.getElementById('predictionForm')?.addEventListener('submit', function() {
