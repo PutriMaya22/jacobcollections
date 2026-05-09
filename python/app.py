@@ -61,19 +61,13 @@ rekomendasi_cache = {
 # ====================================================================
 # 1. DATA UNDERSTANDING (Pemahaman Data)
 # ====================================================================
-# Tujuan: Memahami struktur data, tipe data, dan karakteristik dataset
-# ====================================================================
 
 def data_understanding():
-    """
-    Fungsi untuk melakukan DATA UNDERSTANDING
-    Menampilkan informasi lengkap tentang dataset
-    """
+    """Fungsi untuk melakukan DATA UNDERSTANDING"""
     print("\n" + "="*70)
     print(" 1. DATA UNDERSTANDING (Pemahaman Data)")
     print("="*70)
     
-    # Ambil data dari database
     query_penjualan = "SELECT tanggal, total_pesanan, total_penjualan FROM data_penjualan"
     query_barang = "SELECT kode_produk, nama, total_penjualan, total_pesanan, tanggal_penjualan FROM data_barang"
     
@@ -81,14 +75,12 @@ def data_understanding():
         df_penjualan = pd.read_sql(query_penjualan, engine)
         df_barang = pd.read_sql(query_barang, engine)
         
-        # ------------------------- INFORMASI DATASET -------------------------
         print("\n A. INFORMASI DATASET")
         print("-" * 50)
         print(f"   Dataset Penjualan   : {len(df_penjualan)} baris, {len(df_penjualan.columns)} kolom")
         print(f"   Dataset Barang      : {len(df_barang)} baris, {len(df_barang.columns)} kolom")
         print(f"   Periode Data        : {df_penjualan['tanggal'].min()} s/d {df_penjualan['tanggal'].max()}")
         
-        # ------------------------- STRUKTUR DATA -------------------------
         print("\n B. STRUKTUR DATA (Data Penjualan)")
         print("-" * 50)
         print(f"   {'Kolom':<20} {'Tipe Data':<15} {'Jumlah Non-Null':<15}")
@@ -96,7 +88,6 @@ def data_understanding():
         for col in df_penjualan.columns:
             print(f"   {col:<20} {str(df_penjualan[col].dtype):<15} {df_penjualan[col].count():<15}")
         
-        # ------------------------- STATISTIK DESKRIPTIF -------------------------
         print("\n C. STATISTIK DESKRIPTIF (Data Penjualan)")
         print("-" * 50)
         print(f"   {'Metrik':<20} {'Total Pesanan':<20} {'Total Penjualan (Rp)':<25}")
@@ -106,10 +97,7 @@ def data_understanding():
         print(f"   {'Std Deviasi':<20} {df_penjualan['total_pesanan'].std():<20,.0f} {df_penjualan['total_penjualan'].std():<25,.0f}")
         print(f"   {'Min':<20} {df_penjualan['total_pesanan'].min():<20,.0f} {df_penjualan['total_penjualan'].min():<25,.0f}")
         print(f"   {'Max':<20} {df_penjualan['total_pesanan'].max():<20,.0f} {df_penjualan['total_penjualan'].max():<25,.0f}")
-        print(f"   {'Q1 (25%)':<20} {df_penjualan['total_pesanan'].quantile(0.25):<20,.0f} {df_penjualan['total_penjualan'].quantile(0.25):<25,.0f}")
-        print(f"   {'Q3 (75%)':<20} {df_penjualan['total_pesanan'].quantile(0.75):<20,.0f} {df_penjualan['total_penjualan'].quantile(0.75):<25,.0f}")
         
-        # ------------------------- INFORMASI MISSING VALUE -------------------------
         print("\n D. INFORMASI MISSING VALUE")
         print("-" * 50)
         missing_penjualan = df_penjualan.isnull().sum()
@@ -121,7 +109,7 @@ def data_understanding():
                 if val > 0:
                     print(f"      - {col}: {val} missing ({val/len(df_penjualan)*100:.1f}%)")
         else:
-            print(" Data Penjualan: Tidak ada missing value")
+            print("   Data Penjualan: Tidak ada missing value")
         
         if missing_barang.sum() > 0:
             print("   Data Barang:")
@@ -129,23 +117,18 @@ def data_understanding():
                 if val > 0:
                     print(f"      - {col}: {val} missing ({val/len(df_barang)*100:.1f}%)")
         else:
-            print(" Data Barang: Tidak ada missing value")
+            print("   Data Barang: Tidak ada missing value")
         
-        # ------------------------- INFORMASI DUPLIKAT -------------------------
-        print("\nE. INFORMASI DUPLIKAT")
+        print("\n E. INFORMASI DUPLIKAT")
         print("-" * 50)
         duplikat_penjualan = df_penjualan.duplicated().sum()
         duplikat_barang = df_barang.duplicated().sum()
         print(f"   Data Penjualan: {duplikat_penjualan} baris duplikat")
         print(f"   Data Barang    : {duplikat_barang} baris duplikat")
-
         
-        
-        # ------------------------- DISTRIBUSI DATA -------------------------
         print("\n F. DISTRIBUSI DATA")
         print("-" * 50)
         
-        # Kategori total pesanan
         pesanan_kategori = pd.cut(df_penjualan['total_pesanan'], 
                                    bins=[0, 5, 20, 50, 100, float('inf')],
                                    labels=['1-5', '6-20', '21-50', '51-100', '>100'])
@@ -154,7 +137,6 @@ def data_understanding():
         for kategori, count in distribusi_pesanan.items():
             print(f"      - {kategori}: {count} ({count/len(df_penjualan)*100:.1f}%)")
         
-        # Kategori penjualan
         penjualan_kategori = pd.cut(df_penjualan['total_penjualan'], 
                                      bins=[0, 100000, 500000, 1000000, 5000000, float('inf')],
                                      labels=['<100rb', '100rb-500rb', '500rb-1jt', '1jt-5jt', '>5jt'])
@@ -163,7 +145,6 @@ def data_understanding():
         for kategori, count in distribusi_penjualan.items():
             print(f"      - {kategori}: {count} ({count/len(df_penjualan)*100:.1f}%)")
         
-        # ------------------------- INFORMASI PRODUK -------------------------
         print("\n G. INFORMASI PRODUK")
         print("-" * 50)
         print(f"   Total Produk Unik   : {df_barang['kode_produk'].nunique()}")
@@ -174,18 +155,16 @@ def data_understanding():
         for i, (nama, penjualan) in enumerate(top_products.items(), 1):
             print(f"      {i}. {nama[:40]:<40} Rp {penjualan:,.0f}")
         
-        # ------------------------- KORELASI -------------------------
         print("\n H. KORELASI ANTAR FITUR")
         print("-" * 50)
-        # Hitung korelasi hanya untuk data penjualan
         korelasi = df_penjualan[['total_pesanan', 'total_penjualan']].corr()
         print(f"   Korelasi Pesanan vs Penjualan: {korelasi.iloc[0,1]:.4f}")
         if korelasi.iloc[0,1] > 0.7:
             print("   Korelasi sangat kuat (positif)")
         elif korelasi.iloc[0,1] > 0.5:
-            print("    Korelasi cukup kuat (positif)")
+            print("   Korelasi cukup kuat (positif)")
         else:
-            print("    Korelasi lemah")
+            print("   Korelasi lemah")
         
         print("\n" + "="*70)
         print("DATA UNDERSTANDING SELESAI")
@@ -194,11 +173,10 @@ def data_understanding():
         return df_penjualan, df_barang
         
     except Exception as e:
-        print(f" Error dalam Data Understanding: {e}")
+        print(f"Error dalam Data Understanding: {e}")
         return None, None
 
 
-# Fungsi konversi format numerik Indonesia (titik sebagai pemisah ribuan)
 def convert_to_numeric_indonesia(series):
     """Mengkonversi format angka Indonesia (Rp 1.000.000) ke numerik"""
     if pd.api.types.is_numeric_dtype(series):
@@ -213,12 +191,9 @@ def convert_to_numeric_indonesia(series):
 # ====================================================================
 # 2. DATA PREPARATION (Persiapan Data)
 # ====================================================================
-# Terdiri dari: Data Cleaning, Data Transformation, Split Data
-# ====================================================================
 
-# ------------------------- 2a. METRIK EVALUASI -------------------------
 def mean_absolute_percentage_error(y_true, y_pred):
-    """MAPE: Mean Absolute Percentage Error - untuk akurasi prediksi"""
+    """MAPE: Mean Absolute Percentage Error"""
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     mask = y_true != 0
     if len(y_true[mask]) == 0:
@@ -226,13 +201,8 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
 
 
-# ------------------------- 2b. OUTLIER DETECTION -------------------------
 def detect_outlier_iqr(df, column):
-    """
-    Deteksi outlier menggunakan metode IQR (Interquartile Range)
-    IQR = Q3 - Q1
-    Outlier: nilai < Q1 - 1.5*IQR atau > Q3 + 1.5*IQR
-    """
+    """Deteksi outlier menggunakan metode IQR"""
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
@@ -251,10 +221,7 @@ def detect_outlier_iqr(df, column):
 
 
 def handle_outliers_capping(df, column):
-    """
-    HANDLING OUTLIER: Metode CAPPING
-    Nilai outlier diganti dengan batas bawah/atas (bukan dihapus)
-    """
+    """Handling outlier dengan metode CAPPING"""
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
@@ -268,12 +235,8 @@ def handle_outliers_capping(df, column):
     return df
 
 
-# ------------------------- 2c. HANDLING MISSING VALUES -------------------------
 def impute_zero_with_median(data, column='total_penjualan'):
-    """
-    IMPUTASI: Mengganti nilai 0 dengan MEDIAN dari data yang > 0
-    Alasan: Nilai 0 bisa berarti data kosong, median lebih robust dari mean
-    """
+    """Imputasi nilai 0 dengan MEDIAN"""
     global median_penjualan_cache, median_pesanan_cache
     
     data_valid = data[data[column] > 0]
@@ -305,17 +268,8 @@ def impute_zero_with_median(data, column='total_penjualan'):
         return default_value
 
 
-# ------------------------- 2d. DATA CLEANING (LOAD & PREPARE) -------------------------
 def load_and_prepare_data():
-    """
-    DATA CLEANING LENGKAP meliputi:
-    1. Konversi tipe data
-    2. Hapus duplikat
-    3. Hapus missing values
-    4. Imputasi nilai 0 dengan median
-    5. Deteksi outlier dengan IQR
-    6. Handling outlier dengan CAP
-    """
+    """DATA CLEANING LENGKAP"""
     global median_penjualan_cache, median_pesanan_cache, rata_historis_cache
     
     print("\n" + "="*70)
@@ -325,7 +279,6 @@ def load_and_prepare_data():
     print("\n 2a. DATA CLEANING")
     print("-" * 50)
     
-    # Ambil data dari database
     query = "SELECT tanggal, total_pesanan, total_penjualan FROM data_penjualan"
     data = pd.read_sql(query, engine)
 
@@ -334,7 +287,6 @@ def load_and_prepare_data():
     
     print(f"   Data awal: {len(data)} baris")
     
-    # 1. Konversi tipe data
     data.columns = data.columns.str.strip()
     data = data[['tanggal', 'total_pesanan', 'total_penjualan']]
     data['tanggal'] = pd.to_datetime(data['tanggal'], errors='coerce')
@@ -342,25 +294,20 @@ def load_and_prepare_data():
     data['total_penjualan'] = convert_to_numeric_indonesia(data['total_penjualan'])
     print("   ✓ Konversi tipe data selesai")
     
-    # 2. Hapus duplikat
     jumlah_duplikat = data.duplicated().sum()
     if jumlah_duplikat > 0:
         data = data.drop_duplicates()
         print(f"   ✓ Menghapus {jumlah_duplikat} data duplikat")
     
-    # 3. Hapus missing penting
     data = data.dropna(subset=['tanggal', 'total_pesanan', 'total_penjualan'])
     
-    # 4. Imputasi nilai 0 dengan median
     impute_zero_with_median(data, 'total_penjualan')
     impute_zero_with_median(data, 'total_pesanan')
     
-    # 5. Drop NaN lagi jika masih ada
     data = data.dropna()
     
     print(f"   ✓ Data setelah cleaning: {len(data)} baris")
     
-    # 6. Deteksi & Handling Outlier
     print("\n 2b. DETEKSI & HANDLING OUTLIER")
     print("-" * 50)
     
@@ -373,15 +320,14 @@ def load_and_prepare_data():
     print(f"\n   ✓ Median total_penjualan: Rp {median_penjualan_cache:,.0f}")
     print(f"   ✓ Median total_pesanan: {median_pesanan_cache:.0f}")
     
-    # ------------------------- 2e. DATA TRANSFORMATION -------------------------
     print("\n 2c. DATA TRANSFORMATION")
     print("-" * 50)
     
     data = data.sort_values('tanggal')
-    data['hari'] = data['tanggal'].dt.dayofweek      # 0=Senin, 6=Minggu
-    data['weekend'] = (data['hari'] >= 5).astype(int) # 1=Weekend, 0=Weekday
-    data['bulan'] = data['tanggal'].dt.month          # 1-12
-    data['tahun'] = data['tanggal'].dt.year           # Tahun
+    data['hari'] = data['tanggal'].dt.dayofweek
+    data['weekend'] = (data['hari'] >= 5).astype(int)
+    data['bulan'] = data['tanggal'].dt.month
+    data['tahun'] = data['tanggal'].dt.year
     
     print(f"   ✓ Fitur baru yang dibuat:")
     print(f"      - hari (0-6, 0=Senin, 6=Minggu)")
@@ -389,7 +335,6 @@ def load_and_prepare_data():
     print(f"      - bulan (1-12)")
     print(f"      - tahun")
     
-    # Fitur untuk modeling
     X = data[['total_pesanan', 'hari', 'weekend', 'bulan', 'tahun']]
     y = data['total_penjualan']
     
@@ -400,19 +345,15 @@ def load_and_prepare_data():
     return X, y
 
 
-# ------------------------- 2f. SPLIT DATA -------------------------
 def split_data(X, y):
-    """
-    SPLIT DATA: 80% Training, 20% Testing
-    Menggunakan random_state=42 untuk reproduksibilitas
-    """
+    """SPLIT DATA: 80% Training, 20% Testing"""
     global X_train, X_test, y_train, y_test
     
     print("\n 2d. SPLIT DATA (80:20)")
     print("-" * 50)
     
     if len(X) < 5:
-        print(f" Data terlalu sedikit ({len(X)} baris)")
+        print(f"   Data terlalu sedikit ({len(X)} baris)")
         X_train = X
         X_test = X
         y_train = y
@@ -430,12 +371,9 @@ def split_data(X, y):
 # ====================================================================
 # 3. MODELLING (Pemodelan)
 # ====================================================================
-# Metode: Polynomial Regression Degree 2
-# Alasan: Menangkap hubungan non-linear antara pesanan dan penjualan
-# ====================================================================
 
 def save_model_to_file(model, poly, filepath='model_polynomial.joblib'):
-    """Menyimpan model ke file joblib untuk persistensi"""
+    """Menyimpan model ke file joblib"""
     try:
         model_data = {
             'model': model,
@@ -450,16 +388,17 @@ def save_model_to_file(model, poly, filepath='model_polynomial.joblib'):
         print(f"   Gagal menyimpan model: {e}")
         return False
 
+
 def load_model_from_file(filepath='model_polynomial.joblib'):
     """Memuat model dari file joblib"""
     try:
         if os.path.exists(filepath):
             model_data = joblib.load(filepath)
-            print(f"    Model berhasil dimuat dari {filepath}")
+            print(f"   Model berhasil dimuat dari {filepath}")
             print(f"      - Dibuat pada: {model_data['created_at']}")
             return model_data['model'], model_data['poly']
         else:
-            print(f"  File {filepath} tidak ditemukan, akan training model baru")
+            print(f"   File {filepath} tidak ditemukan, akan training model baru")
             return None, None
     except Exception as e:
         print(f"   Gagal memuat model: {e}")
@@ -467,11 +406,7 @@ def load_model_from_file(filepath='model_polynomial.joblib'):
 
 
 def train_model():
-    """
-    TRAINING MODEL: Polynomial Regression Degree 2
-    - PolynomialFeatures: Membuat fitur interaksi dan pangkat 2
-    - LinearRegression: Melatih model regresi linear
-    """
+    """TRAINING MODEL: Polynomial Regression Degree 2"""
     global model, poly, rata_historis_cache, X_train, X_test, y_train, y_test
     
     try:
@@ -484,7 +419,6 @@ def train_model():
         print("   Alasan: Menangkap hubungan non-linear antara pesanan dan penjualan")
         print("   Formula: y = β₀ + β₁x + β₂x² + ... + interaksi fitur")
         
-        # Coba load model dari file terlebih dahulu
         loaded_model, loaded_poly = load_model_from_file()
         
         if loaded_model is not None and loaded_poly is not None:
@@ -493,8 +427,7 @@ def train_model():
             print("\n   ✓ Model berhasil diload (tanpa training ulang)")
             return True
         
-        # Training model baru
-        print("\n MEMULAI TRAINING MODEL BARU...")
+        print("\n   MEMULAI TRAINING MODEL BARU...")
         X, y = load_and_prepare_data()
         rata_historis_cache = float(y.mean())
         split_data(X, y)
@@ -502,27 +435,23 @@ def train_model():
         if len(X_train) == 0:
             raise Exception("Data training kosong")
         
-        # Polynomial Features (Degree 2)
-        print("\n FEATURE ENGINEERING:")
+        print("\n   FEATURE ENGINEERING:")
         poly = PolynomialFeatures(degree=2, include_bias=False)
         X_train_poly = poly.fit_transform(X_train)
-        print(f"   ✓ Fitur asli: {X_train.shape[1]} fitur")
-        print(f"   ✓ Fitur hasil transformasi polynomial: {X_train_poly.shape[1]} fitur")
+        print(f"      ✓ Fitur asli: {X_train.shape[1]} fitur")
+        print(f"      ✓ Fitur hasil transformasi polynomial: {X_train_poly.shape[1]} fitur")
         
-        # Training Linear Regression
-        print("\n TRAINING LINEAR REGRESSION:")
+        print("\n   TRAINING LINEAR REGRESSION:")
         model = LinearRegression()
         model.fit(X_train_poly, y_train)
-        print("   ✓ Model berhasil dilatih")
+        print("      ✓ Model berhasil dilatih")
         
-        # Simpan model
         save_model_to_file(model, poly)
         
         print("\n" + "="*50)
         print(" MODEL TRAINING COMPLETED")
         print("="*50)
         
-        # Tampilkan koefisien
         print("\n MODEL COEFFICIENTS:")
         feature_names = ['total_pesanan', 'hari', 'weekend', 'bulan', 'tahun']
         print(f"   Intercept: Rp {model.intercept_:,.0f}")
@@ -533,7 +462,7 @@ def train_model():
         return True
         
     except Exception as e:
-        print(f"  Error training model: {e}")
+        print(f"   Error training model: {e}")
         traceback.print_exc()
         raise e
 
@@ -541,16 +470,9 @@ def train_model():
 # ====================================================================
 # 4. EVALUATION (Evaluasi Model)
 # ====================================================================
-# Metrik: RMSE, MAPE, R² Score
-# ====================================================================
 
 def test_model():
-    """
-    EVALUASI MODEL dengan metrik:
-    1. RMSE (Root Mean Square Error) - sensitif terhadap outlier
-    2.MAPE (Mean Absolute Percentage Error) - error dalam persen
-    4. R² (Coefficient of Determination) - seberapa baik model menjelaskan variabel target
-    """
+    """EVALUASI MODEL dengan metrik RMSE, MAPE, R²"""
     global evaluasi_cache, X_test, y_test, X_train, y_train, model, poly
     
     if model is None:
@@ -567,13 +489,11 @@ def test_model():
     print("   2. MAPE - Mean Absolute Percentage Error (error dalam persen)")
     print("   3. R²   - Coefficient of Determination (keakuratan model)")
     
-    # Pastikan data test tersedia
     if X_test is None or len(X_test) == 0:
-        print("  X_test kosong, reload data...")
+        print("   X_test kosong, reload data...")
         X, y = load_and_prepare_data()
         split_data(X, y)
     
-    # Bersihkan NaN
     if X_test.isna().any().any():
         valid_mask = ~X_test.isna().any(axis=1)
         X_test_clean = X_test[valid_mask]
@@ -583,15 +503,13 @@ def test_model():
         y_test_clean = y_test
     
     if len(X_test_clean) == 0:
-        print("  Tidak ada data test yang valid")
+        print("   Tidak ada data test yang valid")
         return
     
     try:
-        # Prediksi pada data test
         X_test_poly = poly.transform(X_test_clean)
         y_pred = model.predict(X_test_poly)
         
-        # Hitung metrik evaluasi
         rmse = np.sqrt(mean_squared_error(y_test_clean, y_pred))
         mape = mean_absolute_percentage_error(y_test_clean, y_pred)
         r2 = r2_score(y_test_clean, y_pred)
@@ -606,7 +524,6 @@ def test_model():
             "last_trained": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
-        # Tampilkan hasil evaluasi
         print("\n" + "="*60)
         print(" HASIL EVALUASI MODEL")
         print("="*60)
@@ -617,33 +534,29 @@ def test_model():
         print(f"{'R²':<15} {r2:.4f}            {'1 = sempurna, 0 = acak':<35}")
         print("-" * 70)
         
-        # Interpretasi
         print("\n INTERPRETASI HASIL:")
         print("-" * 40)
         
-        # Interpretasi R²
         if r2 >= 0.8:
-            print(f"  R² = {r2:.4f} (Sangat Baik)")
-            print(f"      Model mampu menjelaskan {r2*100:.1f}% variasi data penjualan")
+            print(f"   R² = {r2:.4f} (Sangat Baik)")
+            print(f"       Model mampu menjelaskan {r2*100:.1f}% variasi data penjualan")
         elif r2 >= 0.6:
-            print(f"    R² = {r2:.4f} (Cukup Baik)")
-            print(f"      Model mampu menjelaskan {r2*100:.1f}% variasi data penjualan")
+            print(f"   R² = {r2:.4f} (Cukup Baik)")
+            print(f"       Model mampu menjelaskan {r2*100:.1f}% variasi data penjualan")
         else:
-            print(f"    R² = {r2:.4f} (Perlu Perbaikan)")
-            print(f"      Model hanya menjelaskan {r2*100:.1f}% variasi data")
+            print(f"   R² = {r2:.4f} (Perlu Perbaikan)")
+            print(f"       Model hanya menjelaskan {r2*100:.1f}% variasi data")
         
-        # Interpretasi MAPE
         if mape <= 10:
-            print(f"    MAPE = {mape:.2f}% (Sangat Akurat)")
-            print(f"      Tingkat error prediksi < 10%")
+            print(f"   MAPE = {mape:.2f}% (Sangat Akurat)")
+            print(f"       Tingkat error prediksi < 10%")
         elif mape <= 20:
-            print(f"    MAPE = {mape:.2f}% (Cukup Akurat)")
-            print(f"      Tingkat error prediksi antara 10-20%")
+            print(f"   MAPE = {mape:.2f}% (Cukup Akurat)")
+            print(f"       Tingkat error prediksi antara 10-20%")
         else:
-            print(f"    MAPE = {mape:.2f}% (Kurang Akurat)")
-            print(f"      Tingkat error prediksi > 20%, perlu perbaikan model")
+            print(f"   MAPE = {mape:.2f}% (Kurang Akurat)")
+            print(f"       Tingkat error prediksi > 20%, perlu perbaikan model")
         
-        # Informasi tambahan
         print(f"\n INFORMASI TAMBAHAN:")
         print(f"   - Jumlah Data Training: {evaluasi_cache['jumlah_data_train']} baris")
         print(f"   - Jumlah Data Testing : {evaluasi_cache['jumlah_data_test']} baris")
@@ -653,12 +566,12 @@ def test_model():
         save_evaluation_history()
         
     except Exception as e:
-        print(f"    Error evaluasi: {e}")
+        print(f"   Error evaluasi: {e}")
         traceback.print_exc()
 
 
 def save_evaluation_history():
-    """Menyimpan history evaluasi ke database untuk monitoring"""
+    """Menyimpan history evaluasi ke database"""
     global evaluasi_cache
     if evaluasi_cache:
         try:
@@ -690,13 +603,13 @@ def save_evaluation_history():
                     'test': evaluasi_cache.get('jumlah_data_test', 0)
                 })
                 conn.commit()
-                print("\n    History evaluasi disimpan ke database")
+                print("\n   History evaluasi disimpan ke database")
         except Exception as e:
-            print(f"\n    Gagal simpan history: {e}")
+            print(f"\n   Gagal simpan history: {e}")
 
 
 # ====================================================================
-# 5. PREDIKSI HYBRID & REKOMENDASI PRODUK
+# 5. PREDIKSI HYBRID
 # ====================================================================
 
 def load_historical_cache():
@@ -754,13 +667,13 @@ def predict_hybrid(total_pesanan, tanggal):
 
 
 # ====================================================================
-# 6. EXPONENTIAL SMOOTHING (REKOMENDASI PRODUK)
+# 6. REKOMENDASI PRODUK (UNTUK ENDPOINT /predict)
 # ====================================================================
 
 def get_data_hash():
     """Hash untuk deteksi perubahan data"""
     try:
-        query = "SELECT COUNT(*), MAX(updated_at) FROM data_barang"
+        query = "SELECT COUNT(*) as count, MAX(updated_at) as last_updated FROM data_barang"
         result = pd.read_sql(query, engine)
         count = result.iloc[0, 0]
         last_updated = str(result.iloc[0, 1]) if result.iloc[0, 1] else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -774,7 +687,6 @@ def exponential_smoothing_product(data, alpha=0.3):
     """
     EXPONENTIAL SMOOTHING untuk forecast pesanan produk
     Formula: Ft = α * Yt-1 + (1-α) * Ft-1
-    α = smoothing factor (0.3 = 30% bobot data terbaru)
     """
     if len(data) < 1:
         return 0
@@ -927,7 +839,152 @@ def get_product_distribution_with_trend(prediksi, total_pesanan_input, rata_hist
 
 
 # ====================================================================
-# 7. API ENDPOINTS
+# 7. RESTOCK REKOMENDASI DENGAN EXPONENTIAL SMOOTHING (TANPA FALLBACK)
+# ====================================================================
+
+def exponential_smoothing_calculate(data, alpha=0.3):
+    """
+    Exponential Smoothing untuk forecast
+    Formula: Ft = α * Yt-1 + (1-α) * Ft-1
+    """
+    if len(data) < 2:
+        return data[-1] if data else 0
+    
+    result = [data[0]]
+    for i in range(1, len(data)):
+        forecast = alpha * data[i-1] + (1 - alpha) * result[-1]
+        result.append(forecast)
+    
+    # Forecast next period
+    next_forecast = alpha * data[-1] + (1 - alpha) * result[-1]
+    
+    return next_forecast
+
+
+@app.route('/restock', methods=['GET'])
+def get_restock_rekomendasi():
+    try:
+        alpha = float(request.args.get('alpha', 0.3))
+        limit = int(request.args.get('limit', 30))
+        
+        query_produk = f"""
+            SELECT 
+                kode_produk,
+                nama,
+                COALESCE(total_pesanan, 0) as total_terjual,
+                COALESCE(stok, 0) as stok,
+                tanggal_penjualan
+            FROM data_barang
+            WHERE nama IS NOT NULL AND total_pesanan > 0
+            ORDER BY total_pesanan DESC
+            LIMIT {limit}
+        """
+        
+        df_produk = pd.read_sql(query_produk, engine)
+        hasil = []
+        today = datetime.now().date()
+        
+        for _, row in df_produk.iterrows():
+            kode_produk = row['kode_produk']
+            nama_produk = row['nama']
+            total_terjual = int(row['total_terjual']) if pd.notna(row['total_terjual']) else 0
+            stok = int(row['stok']) if pd.notna(row['stok']) else 0
+            tgl_terakhir = row['tanggal_penjualan']
+            
+            # Hitung hari terakhir
+            hari_terakhir = 999
+            if tgl_terakhir and pd.notna(tgl_terakhir):
+                if isinstance(tgl_terakhir, str):
+                    tgl_terakhir = datetime.strptime(tgl_terakhir, '%Y-%m-%d').date()
+                hari_terakhir = (today - tgl_terakhir).days
+            
+            # Ambil history untuk Exponential Smoothing
+            query_history = f"""
+                SELECT total_pesanan
+                FROM data_barang
+                WHERE kode_produk = {int(kode_produk)}
+                    AND tanggal_penjualan IS NOT NULL
+                    AND total_pesanan > 0
+                ORDER BY tanggal_penjualan ASC
+            """
+            
+            df_history = pd.read_sql(query_history, engine)
+            pesanan_list = df_history['total_pesanan'].tolist() if not df_history.empty else []
+            
+            # Exponential Smoothing
+            if len(pesanan_list) >= 2:
+                forecast_next = exponential_smoothing_calculate(pesanan_list, alpha)
+                forecast_next = max(1, round(forecast_next))
+                forecast_harian = forecast_next / 30
+                restock_recommended = max(0, int(forecast_harian * 14 - stok))
+                method_used = f"Exponential Smoothing (α={alpha})"
+                
+                # Tren analysis
+                if len(pesanan_list) >= 3:
+                    recent_avg = sum(pesanan_list[-3:]) / 3
+                    older_avg = sum(pesanan_list[:3]) / 3 if len(pesanan_list) >= 6 else pesanan_list[0]
+                    if older_avg > 0:
+                        trend_pct = ((recent_avg - older_avg) / older_avg) * 100
+                        if trend_pct > 20:
+                            tren_status = f"📈 Naik ({trend_pct:.0f}%)"
+                        elif trend_pct < -20:
+                            tren_status = f"📉 Turun ({abs(trend_pct):.0f}%)"
+                        else:
+                            tren_status = "➡️ Stabil"
+                    else:
+                        tren_status = "📈 Produk Baru"
+                else:
+                    tren_status = "🆕 Data Minim"
+            else:
+                restock_recommended = max(0, int((pesanan_list[-1] if pesanan_list else 1) / 30 * 14 - stok))
+                method_used = "Simple Average (data < 2)"
+                tren_status = "🆕 Data Minim"
+            
+            # Prioritas
+            if stok <= 0 and hari_terakhir <= 7:
+                prioritas, rekomendasi = 1, "🚨 RESTOCK DARURAT - Stok Habis, Masih Laku!"
+            elif stok <= 0:
+                prioritas, rekomendasi = 2, "⚠️ Stok Habis - Perlu Restock"
+            elif restock_recommended > 50:
+                prioritas, rekomendasi = 2, "✅ Restock Besar"
+            elif restock_recommended > 0:
+                prioritas, rekomendasi = 3, "📦 Restock Normal"
+            elif hari_terakhir > 30:
+                prioritas, rekomendasi = 4, "⚠️ Tidak Laku >30 hari - Evaluasi"
+            else:
+                prioritas, rekomendasi = 4, "➡️ Stok Cukup"
+            
+            hasil.append({
+                "kode_produk": str(kode_produk),
+                "nama_produk": nama_produk[:60] if nama_produk else '-',
+                "total_terjual": total_terjual,  # <-- INTEGER
+                "stok": stok,  # <-- INTEGER
+                "jumlah_restock": restock_recommended,  # <-- INTEGER
+                "terakhir_jual": tgl_terakhir.strftime('%Y-%m-%d') if tgl_terakhir else '-',
+                "hari_terakhir": hari_terakhir,
+                "tren": tren_status,
+                "rekomendasi": rekomendasi,
+                "prioritas": prioritas,
+                "metode": method_used
+            })
+        
+        # Sorting
+        hasil.sort(key=lambda x: (x['prioritas'], x['stok']))
+        
+        return jsonify({
+            "status": "success",
+            "tanggal_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "alpha_used": alpha,
+            "metode": "Exponential Smoothing",
+            "total_produk": len(hasil),
+            "rekomendasi_restock": hasil[:15]
+        })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# ====================================================================
+# 8. API ENDPOINTS UTAMA
 # ====================================================================
 
 @app.route('/predict', methods=['POST', 'OPTIONS'])
@@ -1082,6 +1139,7 @@ def rekomendasi_status():
 
 @app.route('/health', methods=['GET'])
 def health():
+    """Cek kesehatan server"""
     return jsonify({
         "status": "healthy", 
         "model_loaded": model is not None,
@@ -1090,11 +1148,10 @@ def health():
 
 
 # ====================================================================
-# 8. MAIN (EKSEKUSI UTAMA)
+# 9. MAIN (EKSEKUSI UTAMA)
 # ====================================================================
 if __name__ == '__main__':
     try:
-        # Hapus file joblib lama jika ada
         if os.path.exists('model_polynomial.joblib'):
             os.remove('model_polynomial.joblib')
         
@@ -1104,20 +1161,15 @@ if __name__ == '__main__':
         print("SISTEM PREDIKSI PENJUALAN & REKOMENDASI PRODUK")
         print("=" * 70)
         
-        # ==================== DATA UNDERSTANDING ====================
         df_penjualan, df_barang = data_understanding()
         
-        # ==================== DATA PREPARATION ====================
         X, y = load_and_prepare_data()
         split_data(X, y)
         
-        # ==================== MODELLING ====================
         train_model()
         
-        # ==================== EVALUATION ====================
         test_model()
         
-        # ==================== LOAD CACHE ====================
         load_historical_cache()
         
         print("\n" + "=" * 70)
@@ -1132,6 +1184,8 @@ if __name__ == '__main__':
         print("   POST /predict              - Prediksi penjualan")
         print("   POST /refresh/rekomendasi  - Force refresh rekomendasi")
         print("   GET  /rekomendasi/status   - Cek status cache")
+        print("   GET  /restock              - Rekomendasi restock (Exponential Smoothing)")
+        print("   POST /restock/refresh      - Refresh restock")
         print("   GET  /health               - Cek kesehatan server")
         print("=" * 70)
         
