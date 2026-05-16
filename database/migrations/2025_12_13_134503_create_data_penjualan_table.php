@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('data_penjualan', function (Blueprint $table) {
             $table->dateTime('tanggal')->nullable();
             $table->float('total_pesanan')->nullable();
-            $table->float('total_penjualan')->nullable();
+           $table->double('total_penjualan', 15, 2)->nullable();
             $table->integer('hari_dalam_minggu')->nullable();
             $table->bigInteger('weekend')->nullable();
             $table->integer('bulan')->nullable();
