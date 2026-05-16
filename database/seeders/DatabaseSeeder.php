@@ -23,18 +23,18 @@ class DatabaseSeeder extends Seeder
 
         // Create or update default users
         User::updateOrCreate(
-            ['email' => 'admin@astera.com'],
+            ['email' => 'admin@jacob.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Admin Jacob',
                 'password' => Hash::make('admin01'),
                 'email_verified_at' => now(),
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'user@astera.com'],
+            ['email' => 'owner@jacob.com'],
             [
-                'name' => 'User Test',
+                'name' => 'Owner Jacob',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
             ]

@@ -12,13 +12,13 @@ return new class extends Migration
         // MySQL cannot modify ENUM -> string with the schema builder directly; use raw SQL
         try {
             // Preserve existing values; set default to 'user_input'
-            DB::statement("ALTER TABLE `users` MODIFY `role` VARCHAR(50) NOT NULL DEFAULT 'user_input'");
+            DB::statement("ALTER TABLE `users` MODIFY `role` VARCHAR(50) NOT NULL DEFAULT 'admin'");
         } catch (\Throwable $e) {
             // Fallback for drivers that support change() (e.g., SQLite during tests)
             if (Schema::hasColumn('users', 'role')) {
                 try {
                     Schema::table('users', function (Blueprint $table) {
-                        $table->string('role', 50)->default('user_input')->change();
+                        $table->string('role', 50)->default('admin')->change();
                     });
                 } catch (\Throwable $ignored) {
                 }
@@ -30,7 +30,7 @@ return new class extends Migration
     {
         // Best-effort revert to ENUM; if it fails, keep VARCHAR
         try {
-            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','user_input','user_operasional') NOT NULL DEFAULT 'user_input'");
+            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','owner') NOT NULL DEFAULT 'admin'");
         } catch (\Throwable $e) {
             // no-op
         }

@@ -12,11 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('data_penjualan', function (Blueprint $table) {
-            $table->id();
-            $table->date('tanggal');
-            $table->string('total_penjualan', 100);
-            $table->integer('total_pesanan');
-            $table->string('penjualan_perpesanan', 255)->nullable();
+            $table->dateTime('tanggal')->nullable();
+            $table->float('total_pesanan')->nullable();
+            $table->float('total_penjualan')->nullable();
+            $table->integer('hari_dalam_minggu')->nullable();
+            $table->bigInteger('weekend')->nullable();
+            $table->integer('bulan')->nullable();
+            $table->integer('tahun')->nullable();
             $table->timestamps();
         });
     }

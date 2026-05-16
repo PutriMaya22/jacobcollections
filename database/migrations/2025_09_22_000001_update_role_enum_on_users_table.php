@@ -10,7 +10,7 @@ return new class extends Migration
         // Update ENUM values to include the current allowed roles
         // Works for MySQL/MariaDB. SQLite will ignore as it doesn't support ENUM.
         try {
-            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','user_input','user_operasional') NOT NULL DEFAULT 'user_input'");
+            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','owner') NOT NULL DEFAULT 'admin'");
         } catch (\Throwable $e) {
             // Ignore on databases that don't support ENUM or if column doesn't exist
         }
@@ -20,7 +20,7 @@ return new class extends Migration
     {
         // Optionally revert to previous set if needed (safe no-op)
         try {
-            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','user','user_operasional') NOT NULL DEFAULT 'user'");
+            DB::statement("ALTER TABLE `users` MODIFY `role` ENUM('admin','owner') NOT NULL DEFAULT 'admin'");
         } catch (\Throwable $e) {
             // Ignore on databases that don't support ENUM or if column doesn't exist
         }
