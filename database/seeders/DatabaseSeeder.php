@@ -14,19 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // Create or update default users
+        // Create or update default users dengan role
         User::updateOrCreate(
             ['email' => 'admin@jacob.com'],
             [
                 'name' => 'Admin Jacob',
                 'password' => Hash::make('admin01'),
+                'role' => 'admin',  
                 'email_verified_at' => now(),
             ]
         );
@@ -36,6 +30,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Owner Jacob',
                 'password' => Hash::make('password123'),
+                'role' => 'owner',  
                 'email_verified_at' => now(),
             ]
         );

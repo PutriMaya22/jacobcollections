@@ -570,44 +570,6 @@ def test_model():
         traceback.print_exc()
 
 
-def save_evaluation_history():
-    """Menyimpan history evaluasi ke database"""
-    global evaluasi_cache
-    if evaluasi_cache:
-        try:
-            create_table_query = """
-                CREATE TABLE IF NOT EXISTS evaluasi_model_log (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    rmse FLOAT,
-                    mape FLOAT,
-                    r_squared FLOAT,
-                    jumlah_data_train INT,
-                    jumlah_data_test INT
-                )
-            """
-            with engine.connect() as conn:
-                conn.execute(text(create_table_query))
-                conn.commit()
-            
-            with engine.connect() as conn:
-                query = text("""
-                    INSERT INTO evaluasi_model_log (rmse, mape, r_squared, jumlah_data_train, jumlah_data_test)
-                    VALUES (:rmse, :mape, :r2, :train, :test)
-                """)
-                conn.execute(query, {
-                    'rmse': evaluasi_cache['RMSE'],
-                    'mape': evaluasi_cache['MAPE'],
-                    'r2': evaluasi_cache['R2'],
-                    'train': evaluasi_cache.get('jumlah_data_train', 0),
-                    'test': evaluasi_cache.get('jumlah_data_test', 0)
-                })
-                conn.commit()
-                print("\n   History evaluasi disimpan ke database")
-        except Exception as e:
-            print(f"\n   Gagal simpan history: {e}")
-
-
 # ====================================================================
 # 5. PREDIKSI HYBRID
 # ====================================================================

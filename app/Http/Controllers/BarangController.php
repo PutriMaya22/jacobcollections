@@ -10,6 +10,19 @@ use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
+    public function __construct()
+    {
+        // Hanya owner yang bisa akses controller ini
+        $this->middleware(function ($request, $next) {
+            if (auth()->user()->role !== 'owner') {
+                // Redirect ke halaman home atau 404 tanpa pesan error
+                return redirect('/dashboard')->with('error', '');
+                // atau pakai abort(404) biar seperti halaman tidak ditemukan
+                // abort(404);
+            }
+            return $next($request);
+        });
+    }
     public function index(Request $request)
     {
         $query = Barang::query();
