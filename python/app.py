@@ -35,7 +35,7 @@ CORS(app)
 # =========================
 # KONEKSI DATABASE
 # =========================
-engine = create_engine("mysql+mysqlconnector://root:@localhost/jacobcollections")
+engine = create_engine("mysql+mysqlconnector://jacobuser:passwordku123@localhost/jacobcollections")
 
 # =========================
 # GLOBAL VARIABLE

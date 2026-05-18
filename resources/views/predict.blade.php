@@ -567,7 +567,7 @@
             <p class="text-gray-500 text-sm">Belum ada data restock.</p>
             <p class="text-gray-400 text-xs mt-2">
                 Pastikan Flask API berjalan di 
-                <code class="bg-gray-100 px-1 rounded">http://localhost:5000</code>
+                <code class="bg-gray-100 px-1 rounded">http://jacobcollections.my.id:5000</code>
             </p>
         </div>
     @endif
