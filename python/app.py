@@ -1140,7 +1140,7 @@ if __name__ == '__main__':
         if evaluasi_cache:
             print(f"📈 FINAL EVALUATION: MAPE={evaluasi_cache['MAPE']:.2f}%, R²={evaluasi_cache['R2']:.4f}")
         
-        print("\n🌐 RUNNING ON http://localhost:5000")
+        print("\n🌐 RUNNING ON http://jacobcollections.my.id:5000")
         print("=" * 70)
         print("📌 ENDPOINTS:")
         print("   POST /predict              - Prediksi penjualan")
