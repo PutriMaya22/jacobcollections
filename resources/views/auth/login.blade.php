@@ -362,41 +362,44 @@
 </head>
 <body>
     <div class="main-container">
-        <!-- Left Section -->
-        <div class="left-section">
-            <div class="left-content">
-                <div class="astera-logo">
-                    SISTEM PREDIKSI PENJUALAN TOKO JACOBCOLLECTIONS
+       <!-- Left Section -->
+<div class="left-section">
+    <div class="left-content">
+        <div class="astera-logo">
+            SISTEM PREDIKSI PENJUALAN TOKO JACOBCOLLECTIONS
+        </div>
+
+        <div class="feature-cards-container">
+            <!-- INPUT - OUTPUT (Prediksi) - PERTAMA -->
+            <div class="feature-card">
+                <div class="feature-icon icon-outline">
+                    <i class="fas fa-plus"></i>
                 </div>
+                <div class="feature-title">INPUT - OUTPUT</div>
+                <div class="feature-subtitle">Prediksi Penjualan</div>
+            </div>
 
-                <div class="feature-cards-container">
-                    <div class="feature-card">
-                        <div class="feature-icon icon-pink">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        <div class="feature-title">PRODUCT</div>
-                        <div class="feature-subtitle">Rekomendasi Produk</div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon icon-blue">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div class="feature-title">VISUAL</div>
-                        <div class="feature-subtitle">DATA</div>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon icon-outline">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <div class="feature-title">INPUT - OUTPUT</div>
-                        <div class="feature-subtitle">Prediksi</div>
-                    </div>
+            <!-- PRODUCT - Rekomendasi Produk - KEDUA -->
+            <div class="feature-card">
+                <div class="feature-icon icon-pink">
+                    <i class="fas fa-layer-group"></i>
                 </div>
+                <div class="feature-title">PRODUCT</div>
+                <div class="feature-subtitle">Rekomendasi Produk</div>
+            </div>
+
+            <!-- VISUAL DATA - KETIGA -->
+            <div class="feature-card">
+                <div class="feature-icon icon-blue">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="feature-title">VISUAL</div>
+                <div class="feature-subtitle">DATA</div>
             </div>
         </div>
-        
+    </div>
+</div>
+
         <!-- Right Section - Login Form -->
         <div class="right-section">
             <div class="login-form">
