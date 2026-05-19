@@ -7,150 +7,208 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
+   <style>
         @import url('https://fonts.googleapis.com/css2?family=Stretch+Pro:wght@400&display=swap');
-        
-        body {
-            font-family: 'Poppins', sans-serif;
+
+        * {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
+            box-sizing: border-box;
         }
+
+        :root {
+            --primary: #58C1D1;
+            --primary-dark: #46a7b6;
+            --secondary: #4A8692;
+            --bg-left: #F3F3F3;
+            --bg-right: #ffffff;
+            --text-dark: #374151;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: #eef2f5;
+        }
+
         .main-container {
-            display: flex;
             min-height: 100vh;
+            display: flex;
+            align-items: stretch;
         }
+
+        /* LEFT */
         .left-section {
-            flex: 1;
-            background: #F3F3F3;
+            flex: 1.15;
+            background: var(--bg-left);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
-            color: white;
+            padding: 3rem;
         }
-        .right-section {
-            flex: 1;
-            background: white;
+
+        .left-content {
+            width: 100%;
+            max-width: 760px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 2rem;
+            justify-content: center;
+            text-align: center;
         }
+
         .astera-logo {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 3rem;
             font-family: 'Stretch Pro', sans-serif;
-            letter-spacing: 0.05em;
+            font-size: clamp(1.8rem, 3vw, 3rem);
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
+            margin-bottom: 2.5rem;
+            max-width: 760px;
             background: linear-gradient(135deg, #4A8692, #58C1D1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            transition: all 0.3s ease;
+            word-break: break-word;
         }
-        
-        .astera-logo:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
+
         .feature-cards-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             width: 100%;
-            max-width: 320px;
-            margin: 0 auto;
-            gap: 1.5rem;
+            max-width: 700px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
         }
+
         .feature-card {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            width: 100%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-family: 'Poppins', sans-serif;
+            border-radius: 18px;
+            padding: 1.5rem 1.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
+            min-height: 170px;
+            justify-content: center;
+            transition: transform 0.25s ease;
         }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+
         .feature-icon {
-            width: 50px;
-            height: 50px;
+            width: 58px;
+            height: 58px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1rem;
+            font-size: 1.1rem;
         }
+
         .icon-pink {
-            background: #fce4ec;
+            background: #eefbff;
             color: #58C1D1;
         }
+
         .icon-blue {
-            background: #e3f2fd;
+            background: #e8f0ff;
             color: #1976d2;
         }
+
         .icon-outline {
             border: 2px dashed #9ca3af;
             background: transparent;
             color: #3b82f6;
         }
-        .feature-text {
-            font-family: 'Poppins', sans-serif;
-            width: 100%;
-        }
+
         .feature-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.35rem;
+            font-size: 0.95rem;
         }
+
         .feature-subtitle {
-            font-family: 'Poppins', sans-serif;
             font-weight: 400;
-            color: #6b7280;
-            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
+
+        /* RIGHT */
+        .right-section {
+            flex: 0.9;
+            background: #f9fbfc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
         .login-form {
             width: 100%;
-            max-width: 400px;
+            max-width: 470px;
         }
-        .form-input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-            position: relative;
-            font-family: 'Poppins', sans-serif;
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 2.2rem;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #58C1D1;
-            box-shadow: 0 0 0 3px rgba(88, 193, 209, 0.1);
+
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: left;
         }
+
+        .welcome-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-halo {
+            color: var(--secondary);
+        }
+
+        .welcome-subtitle {
+            color: #787878;
+        }
+
+        .grey-text {
+            color: #6b7280;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
         .input-group {
             position: relative;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
+
         .input-icon {
             position: absolute;
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #58C1D1;
-            z-index: 10;
+            color: var(--primary);
+            z-index: 2;
         }
+
         .input-with-icon {
-            padding-left: 3rem;
+            padding-left: 3rem !important;
         }
+
         .password-toggle {
             position: absolute;
             right: 1rem;
@@ -158,162 +216,187 @@
             transform: translateY(-50%);
             color: #6b7280;
             cursor: pointer;
-            z-index: 10;
+            z-index: 2;
         }
+
+        .form-input {
+            width: 100%;
+            height: 54px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+            padding: 0 1rem;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(88, 193, 209, 0.12);
+        }
+
         .login-btn {
             width: 100%;
-            background: #58C1D1;
+            height: 54px;
+            background: var(--primary);
             color: white;
-            padding: 0.875rem 1rem;
             border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.875rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-bottom: 1.5rem;
+            transition: all 0.2s ease;
+            margin-top: 0.25rem;
             font-family: 'Poppins', sans-serif;
         }
+
         .login-btn:hover {
-            background: #4a9ba8;
+            background: var(--primary-dark);
         }
-        .google-btn {
-            width: 100%;
-            background: white;
-            color: #374151;
-            padding: 0.875rem 1rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
+
+        .form-footer {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-family: 'Poppins', sans-serif;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
         }
-        .google-btn:hover {
-            background: #f9fafb;
-        }
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 1.5rem 0;
-        }
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: #e5e7eb;
-        }
-        .divider-text {
-            padding: 0 1rem;
-            color: #6b7280;
-            font-size: 0.875rem;
-            font-family: 'Poppins', sans-serif;
-        }
-        .teal-text {
-            color: #58C1D1;
-        }
-        .grey-text {
-            color: #6b7280;
-            font-family: 'Poppins', sans-serif;
-        }
+
         .link-custom {
-            color: #4A8692;
+            color: var(--secondary);
             text-decoration: none;
-            font-size: 0.875rem;
-            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
             font-weight: 600;
         }
+
         .link-custom:hover {
             text-decoration: underline;
         }
-        .welcome-text {
-            font-family: 'Poppins', sans-serif;
-        }
-        .welcome-halo {
-            color: #4A8692;
-            font-family: 'Poppins', sans-serif;
-        }
-        .welcome-subtitle {
-            color: #787878;
-            font-family: 'Poppins', sans-serif;
-        }
+
         .signup-text {
-            font-family: 'Poppins', sans-serif;
+            margin-top: 1.25rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.92rem;
         }
+
         .signup-link {
-            color: #498E9C;
-            font-family: 'Poppins', sans-serif;
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
         }
-        .kenalin-text {
-            color: #787878;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 400;
+
+        .signup-link:hover {
+            text-decoration: underline;
         }
-        .kenalin-astera {
-            color: #4A8692;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 400;
+
+        .session-status {
+            margin-bottom: 1rem;
+            padding: 0.9rem 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+            border-radius: 12px;
+            font-size: 0.9rem;
         }
-        .description-text {
-            color: #787878;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 400;
+
+        .error-text {
+            margin-top: 0.45rem;
+            font-size: 0.85rem;
+            color: #dc2626;
         }
-        @media (max-width: 768px) {
+
+        @media (max-width: 1100px) {
             .main-container {
                 flex-direction: column;
             }
-            .left-section {
-                padding: 1rem;
-            }
+
+            .left-section,
             .right-section {
-                padding: 1rem;
+                width: 100%;
+                padding: 2rem 1.25rem;
+            }
+
+            .left-content {
+                max-width: 100%;
+            }
+
+            .feature-cards-container {
+                max-width: 100%;
+            }
+
+            .login-form {
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .astera-logo {
+                font-size: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .feature-cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+                min-height: auto;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 18px;
+            }
+
+            .welcome-text {
+                font-size: 1.45rem;
+            }
+
+            .form-input,
+            .login-btn {
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <!-- Left Section - ASTERA Branding -->
+        <!-- Left Section -->
         <div class="left-section">
-            <div class="astera-logo">JacobCollections</div>
-            
-            <!-- Feature Cards Container -->
-            <div class="feature-cards-container">
-                <div class="feature-card">
-                    <div class="feature-icon icon-pink">
-                        <i class="fas fa-layer-group fa-lg"></i>
-                    </div>
-                    <div class="feature-text">
+            <div class="left-content">
+                <div class="astera-logo">
+                    SISTEM PREDIKSI PENJUALAN TOKO JACOBCOLLECTIONS
+                </div>
+
+                <div class="feature-cards-container">
+                    <div class="feature-card">
+                        <div class="feature-icon icon-pink">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
                         <div class="feature-title">PRODUCT</div>
-                        <div class="feature-subtitle">CATEGORY</div>
+                        <div class="feature-subtitle">Rekomendasi Produk</div>
                     </div>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon icon-blue">
-                        <i class="fas fa-chart-pie fa-lg"></i>
+
+                    <div class="feature-card">
+                        <div class="feature-icon icon-blue">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="feature-title">VISUAL</div>
+                        <div class="feature-subtitle">DATA</div>
                     </div>
-                    <div class="feature-text">
-                        <div class="feature-subtitle">VISUAL DATA</div>
-                    </div>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon icon-outline">
-                        <i class="fas fa-plus fa-lg"></i>
-                    </div>
-                    <div class="feature-text">
-                        <div class="feature-subtitle">Input-Output Products</div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon icon-outline">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="feature-title">INPUT - OUTPUT</div>
+                        <div class="feature-subtitle">Prediksi</div>
                     </div>
                 </div>
             </div>
-            </div> 
-
+        </div>
+        
         <!-- Right Section - Login Form -->
         <div class="right-section">
             <div class="login-form">

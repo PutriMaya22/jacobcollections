@@ -55,7 +55,7 @@ class PredictController extends Controller
     {
         try {
             // Panggil API Flask
-            $response = Http::timeout(10)->get('http://127.0.0.1:5000/restock');
+            $response = Http::timeout(10)->get('http://jacobcollections.my.id:5000/restock');
             
             if ($response->successful()) {
                 $data = $response->json();
@@ -421,7 +421,7 @@ class PredictController extends Controller
         try {
             $alpha = $request->get('alpha', 0.3);
 
-            $response = Http::timeout(30)->post('http://127.0.0.1:5000/predict', [
+            $response = Http::timeout(30)->post('http://jacobcollections.my.id:5000/predict', [
                 'total_pesanan' => (int) $request->total_pesanan,
                 'tanggal'       => $request->tanggal,
                 'alpha'         => (float) $alpha,
