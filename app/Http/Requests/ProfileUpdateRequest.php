@@ -22,6 +22,7 @@ class ProfileUpdateRequest extends FormRequest
             'contact_email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
             'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'banner_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:4096'],
+            'delete_profile_picture' => ['nullable', 'boolean'],
         ];
     }
 }

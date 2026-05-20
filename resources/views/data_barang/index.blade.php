@@ -54,7 +54,7 @@
         <div class="flex justify-between items-center flex-wrap gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Data Produk</h1>
-                <p class="text-gray-500 mt-1">Kelola data produk dan stok barang</p>
+                <p class="text-gray-500 mt-1">Kelola data produk</p>
             </div>
             
             @if(auth()->user()->role === 'owner')
@@ -65,7 +65,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Tambah Barang
+                    Tambah Produk
                 </a>
 
               <!-- Tombol Import (memunculkan modal) -->
@@ -240,7 +240,7 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
             <div class="text-4xl opacity-75"></div>
         </div>
         <div class="mt-3 text-green-100 text-xs">
-            Seluruh unit barang
+            Seluruh produk
         </div>
     </div>
 
@@ -254,7 +254,7 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
             <div class="text-4xl opacity-75"></div>
         </div>
         <div class="mt-3 text-red-100 text-xs">
-            {{ number_format($persentaseStokHabis, 1) }}% dari total barang
+            {{ number_format($persentaseStokHabis, 1) }}% dari total produk
         </div>
     </div>
 
@@ -343,7 +343,7 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kode Produk</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Barang</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Produk</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status Produk</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Stok</th>
@@ -490,7 +490,7 @@ document.getElementById('btnImportWithDate').addEventListener('click', function(
                         <td colspan="10" class="px-6 py-12 text-center">
                             <div class="text-center">
                                 <div class="text-6xl mb-4"></div>
-                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum Ada Data Barang</h3>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum Ada Data Produk</h3>
                                 <p class="text-gray-500 mb-4">Mulai tambahkan data produk untuk kelola inventaris</p>
                                 @if(auth()->user()->role === 'owner')
                                 <a href="{{ route('data_barang.create') }}" 

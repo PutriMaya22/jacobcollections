@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Storage;
                 </div>
             </div>
         </div>
+        
         <!-- Profile header under banner -->
         <div class="flex items-center justify-between -mt-10 mb-6 pr-2 border-b border-gray-200 pb-2">
             <nav class="flex items-center gap-8">
@@ -58,7 +59,6 @@ use Illuminate\Support\Facades\Storage;
 
         <!-- Profile Form -->
         <div id="profileContent" class="bg-white rounded-lg shadow-sm border p-8 transition-all">
-            <!-- Success Message -->
             @if (session('status') === 'profile-updated')
                 <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div class="flex items-center">
@@ -77,16 +77,11 @@ use Illuminate\Support\Facades\Storage;
                 @csrf
                 @method('patch')
                 <input type="hidden" name="email" value="{{ old('email', $user->email) }}">
-                <!-- Debug info -->
-                <div class="hidden">
-                    <p>Form action: {{ route('profile.update') }}</p>
-                    <p>CSRF token: {{ csrf_token() }}</p>
-                </div>
 
                 <!-- Username -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $user->name ?? 'Hendrick Moseng') }}" 
+                    <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                            placeholder="Enter your username">
                     @error('name')
@@ -131,19 +126,11 @@ use Illuminate\Support\Facades\Storage;
                                placeholder="Enter contact email">
                     </div>
                 </div>
-
-                <!-- Save Button -->
-                <div class="flex justify-end pt-6">
-                    <button type="submit" class="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all hover:-translate-y-0.5 shadow-lg">
-                        Save Changes
-                    </button>
-                </div>
             </form>
         </div>
 
-        <!-- Password Form -->
+        <!-- Password Form - TANPA OTP -->
         <div id="passwordContent" class="bg-white rounded-lg shadow-sm border p-8 transition-all hidden">
-            <!-- Success Message -->
             @if (session('status') === 'password-updated')
                 <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div class="flex items-center">
@@ -153,17 +140,26 @@ use Illuminate\Support\Facades\Storage;
                 </div>
             @endif
             
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                        <p class="text-red-700">Terjadi kesalahan:</p>
+                    </div>
+                    <ul class="mt-2 list-disc list-inside text-sm text-red-600">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
             <div class="mb-8">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Password</h2>
                 <p class="text-gray-600">Update your password to keep your account secure.</p>
             </div>
 
-            <!-- Hidden standalone form to send OTP without nesting -->
-            <form id="sendOtpForm" method="POST" action="{{ route('password.send-otp') }}" class="hidden">
-                @csrf
-            </form>
-
-            <form id="passwordUpdateForm" method="post" action="{{ route('password.update') }}" class="space-y-6">
+            <form id="passwordUpdateForm" method="POST" action="{{ route('profile.password.update') }}" class="space-y-6">
                 @csrf
                 @method('put')
 
@@ -173,9 +169,6 @@ use Illuminate\Support\Facades\Storage;
                     <input type="password" id="current_password" name="current_password" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                            placeholder="Enter current password">
-                    @error('current_password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <!-- New Password -->
@@ -183,10 +176,7 @@ use Illuminate\Support\Facades\Storage;
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                     <input type="password" id="password" name="password" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                           placeholder="Enter new password">
-                    @error('password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                           placeholder="Enter new password (minimal 8 karakter)">
                 </div>
 
                 <!-- Confirm Password -->
@@ -195,13 +185,6 @@ use Illuminate\Support\Facades\Storage;
                     <input type="password" id="password_confirmation" name="password_confirmation" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                            placeholder="Confirm new password">
-                </div>
-
-                <!-- Save Button -->
-                <div class="flex justify-end pt-6">
-                    <button type="submit" class="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all hover:-translate-y-0.5 shadow-lg">
-                        Update Password
-                    </button>
                 </div>
             </form>
         </div>
@@ -221,49 +204,38 @@ use Illuminate\Support\Facades\Storage;
 
         <!-- Hidden Delete Account Form -->
         <form id="deleteAccountForm" method="POST" action="{{ route('profile.destroy') }}" class="hidden">
-        @csrf
-        @method('DELETE')
-        <input type="password" name="password" id="deletePassword" class="hidden">
+            @csrf
+            @method('DELETE')
+            <input type="password" name="password" id="deletePassword" class="hidden">
         </form>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Tab functionality
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Profile page loaded successfully');
-        
+        // ========== TAB FUNCTIONALITY ==========
         const profileTab = document.getElementById('profileTab');
         const passwordTab = document.getElementById('passwordTab');
         const profileContent = document.getElementById('profileContent');
         const passwordContent = document.getElementById('passwordContent');
-
-        if (!profileTab || !passwordTab || !profileContent || !passwordContent) {
-            console.error('Some elements not found:', { profileTab, passwordTab, profileContent, passwordContent });
-            return;
-        }
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         function switchTab(tabName) {
-            console.log('Switching to tab:', tabName);
+            profileContent.classList.add('hidden');
+            passwordContent.classList.add('hidden');
             
-            // Hide all content
-            document.querySelectorAll('#profileContent, #passwordContent').forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Remove active class from all tabs
-            document.querySelectorAll('#profileTab, #passwordTab').forEach(tab => {
-                tab.classList.remove('border-teal-500', 'text-teal-500');
-                tab.classList.add('border-transparent', 'text-gray-500');
-            });
-
-            // Show selected content and activate tab
+            profileTab.classList.remove('border-teal-500', 'text-teal-500');
+            profileTab.classList.add('border-transparent', 'text-gray-500');
+            passwordTab.classList.remove('border-teal-500', 'text-teal-500');
+            passwordTab.classList.add('border-transparent', 'text-gray-500');
+            
             if (tabName === 'profile') {
                 profileContent.classList.remove('hidden');
                 profileTab.classList.remove('border-transparent', 'text-gray-500');
                 profileTab.classList.add('border-teal-500', 'text-teal-500');
-            } else if (tabName === 'password') {
+            } else {
                 passwordContent.classList.remove('hidden');
                 passwordTab.classList.remove('border-transparent', 'text-gray-500');
                 passwordTab.classList.add('border-teal-500', 'text-teal-500');
@@ -273,37 +245,38 @@ use Illuminate\Support\Facades\Storage;
         profileTab.addEventListener('click', () => switchTab('profile'));
         passwordTab.addEventListener('click', () => switchTab('password'));
 
-        // If server indicates to open specific tab
+        // Open password tab if session says so
         @if (session('open_tab') === 'password')
             switchTab('password');
         @endif
 
-        // Profile picture edit functionality
+        // ========== PROFILE PICTURE HANDLING ==========
         const editProfileBtn = document.getElementById('editProfileBtn');
         const deleteProfileBtn = document.getElementById('deleteProfileBtn');
-        const profileImage = document.getElementById('profileImage') || document.getElementById('profileAvatar');
+        const profileImage = document.getElementById('profileAvatar');
         const profileInput = document.getElementById('profileInput');
-        
-        console.log('Profile elements found:', {
-            editProfileBtn: !!editProfileBtn,
-            deleteProfileBtn: !!deleteProfileBtn,
-            profileImage: !!profileImage,
-            profileInput: !!profileInput
-        });
+        const deleteProfileFlag = document.getElementById('deleteProfileFlag');
 
         if (editProfileBtn) {
-            editProfileBtn.addEventListener('click', function() {
-                profileInput.click();
-            });
+            editProfileBtn.addEventListener('click', () => profileInput.click());
         }
 
         if (deleteProfileBtn) {
-            deleteProfileBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to delete your profile picture?')) {
-                    const deleteFlag = document.getElementById('deleteProfileFlag');
-                    if (deleteFlag) deleteFlag.value = '1';
-                    profileImage.src = 'https://randomuser.me/api/portraits/men/32.jpg';
-                }
+            deleteProfileBtn.addEventListener('click', () => {
+                Swal.fire({
+                    title: 'Hapus Foto Profil?',
+                    text: 'Foto profil Anda akan dihapus.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteProfileFlag.value = '1';
+                        profileImage.src = 'https://randomuser.me/api/portraits/men/32.jpg';
+                        Swal.fire('Terhapus', 'Foto profil telah dihapus', 'success');
+                    }
+                });
             });
         }
 
@@ -311,136 +284,110 @@ use Illuminate\Support\Facades\Storage;
             profileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    console.log('Profile file selected:', file.name, 'Size:', file.size);
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         profileImage.src = e.target.result;
-                        console.log('Profile image preview updated');
-                    };
-                    reader.onerror = function() {
-                        console.error('Error reading profile file');
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Gagal membaca file profile picture. Silakan coba lagi.',
-                            icon: 'error',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
+                        deleteProfileFlag.value = '0';
                     };
                     reader.readAsDataURL(file);
                 }
             });
         }
 
-        // Save and Cancel functionality
-        const saveBtn = document.getElementById('saveBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        
-        console.log('Button elements found:', {
-            saveBtn: !!saveBtn,
-            cancelBtn: !!cancelBtn
-        });
+        // ========== BANNER HANDLING ==========
+        const bannerCameraBtn = document.getElementById('bannerCameraBtn');
+        const bannerInput = document.getElementById('bannerInput');
+        const bannerEl = document.querySelector('.profile-banner');
 
-        if (saveBtn) {
-            saveBtn.addEventListener('click', function() {
-                const isProfileActive = !profileContent.classList.contains('hidden');
-                console.log('Save button clicked, profile active:', isProfileActive);
-                
-                const title = isProfileActive ? 'Simpan perubahan profil?' : 'Simpan perubahan password?';
-                const text = isProfileActive ? 'Perubahan data profil akan disimpan.' : 'Password akan diperbarui.';
-                Swal.fire({
-                    title: title,
-                    text: text,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, simpan',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (isProfileActive) {
-                            // Submit profile form with all data including files
-                            const form = document.getElementById('profileUpdateForm');
-                            if (form) {
-                                console.log('Submitting profile form...');
-                                
-                                // Ensure all file inputs are properly included
-                                const profileInput = document.getElementById('profileInput');
-                                const bannerInput = document.getElementById('bannerInput');
-                                
-                                console.log('Profile input files:', profileInput?.files?.length || 0);
-                                console.log('Banner input files:', bannerInput?.files?.length || 0);
-                                
-                                // If profile picture was selected, ensure it's included
-                                if (profileInput && profileInput.files.length > 0) {
-                                    console.log('Profile picture selected:', profileInput.files[0].name);
-                                }
-                                
-                                // If banner was selected, ensure it's included
-                                if (bannerInput && bannerInput.files.length > 0) {
-                                    console.log('Banner selected:', bannerInput.files[0].name);
-                                }
-                                
-                                // Ensure banner input is in the form before submitting
-                                if (bannerInput && !form.contains(bannerInput)) {
-                                    console.log('Adding banner input to form');
-                                    form.appendChild(bannerInput);
-                                }
-                                
-                                // Log form data before submission
-                                const formData = new FormData(form);
-                                console.log('Form data before submission:');
-                                for (let [key, value] of formData.entries()) {
-                                    console.log(key, ':', value);
-                                }
-                                
-                                console.log('Submitting form...');
-                                
-                                // Add error handling for form submission
-                                try {
-                                    form.submit();
-                                } catch (error) {
-                                    console.error('Error submitting form:', error);
-                                    Swal.fire({
-                                        title: 'Error',
-                                        text: 'Gagal mengirim form. Silakan coba lagi.',
-                                        icon: 'error',
-                                        timer: 2000,
-                                        showConfirmButton: false
-                                    });
-                                }
-                            } else {
-                                console.error('Profile form not found!');
-                            }
-                        } else {
-                            const pwdForm = document.getElementById('passwordUpdateForm');
-                            if (pwdForm) {
-                                console.log('Submitting password form...');
-                                pwdForm.submit();
-                            } else {
-                                console.error('Password form not found!');
-                            }
-                        }
-                    }
-                });
+        if (bannerCameraBtn && bannerInput) {
+            bannerCameraBtn.addEventListener('click', () => bannerInput.click());
+            
+            bannerInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        bannerEl.style.backgroundImage = `url(${e.target.result})`;
+                        bannerEl.style.backgroundSize = 'cover';
+                        bannerEl.style.backgroundPosition = 'center';
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
         }
 
-        // Capture original state for cancel
-        const bannerEl = document.querySelector('.profile-banner');
-        const originalBannerBg = bannerEl ? bannerEl.style.backgroundImage : '';
-        const originalBannerData = bannerEl ? bannerEl.getAttribute('data-original-banner') : '';
-        const nameInput = document.getElementById('name');
-        const phoneInput = document.getElementById('phone');
-        const contactEmailInput = document.getElementById('contact_email');
-        const deleteFlagEl = document.getElementById('deleteProfileFlag');
-        const originalName = nameInput ? nameInput.value : '';
-        const originalPhone = phoneInput ? phoneInput.value : '';
-        const originalContactEmail = contactEmailInput ? contactEmailInput.value : '';
-        const originalProfileSrc = profileImage ? profileImage.src : '';
+        // ========== SAVE BUTTON ==========
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                const isProfileActive = !profileContent.classList.contains('hidden');
+                
+                if (isProfileActive) {
+                    // Submit profile form
+                    Swal.fire({
+                        title: 'Simpan perubahan?',
+                        text: 'Apakah Anda yakin ingin menyimpan perubahan profil?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, simpan',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('profileUpdateForm');
+                            if (bannerInput && !form.contains(bannerInput)) {
+                                form.appendChild(bannerInput);
+                            }
+                            form.submit();
+                        }
+                    });
+                } else {
+                    // Validate password form
+                    const currentPassword = document.getElementById('current_password').value;
+                    const newPassword = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('password_confirmation').value;
+                    
+                    if (!currentPassword) {
+                        Swal.fire('Error', 'Password saat ini wajib diisi', 'error');
+                        return;
+                    }
+                    
+                    if (newPassword.length < 8) {
+                        Swal.fire('Error', 'Password baru minimal 8 karakter', 'error');
+                        return;
+                    }
+                    
+                    if (newPassword !== confirmPassword) {
+                        Swal.fire('Error', 'Konfirmasi password baru tidak sesuai', 'error');
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: 'Update Password?',
+                        text: 'Apakah Anda yakin ingin mengubah password?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, update',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('passwordUpdateForm').submit();
+                        }
+                    });
+                }
+            });
+        }
+
+        // ========== CANCEL BUTTON ==========
+        const originalData = {
+            name: document.getElementById('name')?.value || '',
+            phone: document.getElementById('phone')?.value || '',
+            contact_email: document.getElementById('contact_email')?.value || '',
+            profileSrc: profileImage?.src || '',
+            bannerBg: bannerEl?.style.backgroundImage || '',
+            originalBanner: bannerEl?.getAttribute('data-original-banner') || ''
+        };
 
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function() {
-                console.log('Cancel button clicked');
                 Swal.fire({
                     title: 'Batalkan perubahan?',
                     text: 'Semua perubahan yang belum disimpan akan hilang.',
@@ -450,153 +397,60 @@ use Illuminate\Support\Facades\Storage;
                     cancelButtonText: 'Kembali'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log('Cancelling changes...');
+                        // Reset form values
+                        if (document.getElementById('name')) document.getElementById('name').value = originalData.name;
+                        if (document.getElementById('phone')) document.getElementById('phone').value = originalData.phone;
+                        if (document.getElementById('contact_email')) document.getElementById('contact_email').value = originalData.contact_email;
                         
-                        // Revert inputs
-                        if (nameInput) {
-                            nameInput.value = originalName;
-                            console.log('Reverted name to:', originalName);
-                        }
-                        if (phoneInput) {
-                            phoneInput.value = originalPhone;
-                            console.log('Reverted phone to:', originalPhone);
-                        }
-                        if (contactEmailInput) {
-                            contactEmailInput.value = originalContactEmail;
-                            console.log('Reverted contact email to:', originalContactEmail);
-                        }
+                        // Reset profile picture
+                        if (profileImage) profileImage.src = originalData.profileSrc;
+                        if (deleteProfileFlag) deleteProfileFlag.value = '0';
                         
-                        // Revert profile image and flags
-                        if (deleteFlagEl) {
-                            deleteFlagEl.value = '0';
-                            console.log('Reset delete profile flag');
-                        }
-                        if (profileImage) {
-                            profileImage.src = originalProfileSrc;
-                            console.log('Reverted profile image');
-                        }
-                        
-                        // Clear file inputs
-                        const profileFile = document.getElementById('profileInput');
-                        if (profileFile) {
-                            profileFile.value = '';
-                            console.log('Cleared profile file input');
-                        }
-                        
-                        // Revert banner preview to original state
+                        // Reset banner
                         if (bannerEl) {
-                            if (originalBannerData && originalBannerData !== '') {
-                                bannerEl.style.backgroundImage = `url('${originalBannerData}')`;
+                            if (originalData.originalBanner) {
+                                bannerEl.style.backgroundImage = `url('${originalData.originalBanner}')`;
                                 bannerEl.style.backgroundSize = 'cover';
                                 bannerEl.style.backgroundPosition = 'center';
-                                console.log('Reverted banner to original:', originalBannerData);
                             } else {
-                                // Reset to default gradient if no original banner
                                 bannerEl.style.backgroundImage = 'linear-gradient(90deg, #d6f2f2 0%, #eaf6ff 45%, #ffe5cf 100%)';
-                                console.log('Reset banner to default gradient');
                             }
                         }
                         
-                        // Clear banner file input
-                        if (bannerInput) {
-                            bannerInput.value = '';
-                            console.log('Cleared banner file input');
-                        }
+                        // Clear file inputs
+                        if (profileInput) profileInput.value = '';
+                        if (bannerInput) bannerInput.value = '';
                         
-                        // Feedback
-                        Swal.fire({
-                            title: 'Perubahan dibatalkan',
-                            icon: 'success',
-                            timer: 1200,
-                            showConfirmButton: false
-                        });
+                        // Reset password form
+                        if (document.getElementById('current_password')) document.getElementById('current_password').value = '';
+                        if (document.getElementById('password')) document.getElementById('password').value = '';
+                        if (document.getElementById('password_confirmation')) document.getElementById('password_confirmation').value = '';
+                        
+                        Swal.fire('Perubahan dibatalkan', '', 'success');
                     }
                 });
             });
         }
 
-        // Delete Account Confirmation
+        // ========== DELETE ACCOUNT ==========
         const deleteAccountBtn = document.getElementById('deleteAccountBtn');
         if (deleteAccountBtn) {
             deleteAccountBtn.addEventListener('click', async function() {
                 const { value: password } = await Swal.fire({
-                    title: 'Konfirmasi Penghapusan Akun',
+                    title: 'Hapus Akun',
                     text: "Masukkan password Anda untuk mengkonfirmasi penghapusan akun",
                     input: 'password',
                     inputPlaceholder: 'Masukkan password Anda',
-                    inputAttributes: {
-                        autocapitalize: 'off',
-                        autocorrect: 'off'
-                    },
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus Akun Saya',
-                    cancelButtonText: 'Batal',
-                    reverseButtons: true,
-                    focusCancel: true,
-                    validationMessage: 'Password wajib diisi'
+                    confirmButtonText: 'Ya, Hapus Akun',
+                    cancelButtonText: 'Batal'
                 });
 
                 if (password) {
-                    // Set password value in hidden input
                     document.getElementById('deletePassword').value = password;
-                    
-                    // Submit the form
                     document.getElementById('deleteAccountForm').submit();
-                }
-            });
-        }
-
-        // Banner image change functionality
-        const bannerCameraBtn = document.getElementById('bannerCameraBtn');
-        const bannerInput = document.getElementById('bannerInput');
-        const profileCameraBtn = document.getElementById('profileCameraBtn');
-        
-        console.log('Banner elements found:', {
-            bannerCameraBtn: !!bannerCameraBtn,
-            bannerInput: !!bannerInput,
-            profileCameraBtn: !!profileCameraBtn
-        });
-
-        if (bannerCameraBtn) {
-            bannerCameraBtn.addEventListener('click', function() {
-                bannerInput.click();
-            });
-        }
-
-        if (profileCameraBtn) {
-            profileCameraBtn.addEventListener('click', function() {
-                profileInput.click();
-            });
-        }
-
-        if (bannerInput) {
-            bannerInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    console.log('Banner file selected:', file.name, 'Size:', file.size);
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const banner = document.querySelector('.profile-banner') || document.querySelector('.rounded-2xl.h-44');
-                        if (banner) {
-                            banner.style.backgroundImage = `url(${e.target.result})`;
-                            banner.style.backgroundSize = 'cover';
-                            banner.style.backgroundPosition = 'center';
-                            console.log('Banner preview updated');
-                        }
-                    };
-                    reader.onerror = function() {
-                        console.error('Error reading banner file');
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Gagal membaca file banner. Silakan coba lagi.',
-                            icon: 'error',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    };
-                    reader.readAsDataURL(file);
                 }
             });
         }

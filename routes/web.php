@@ -49,9 +49,13 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/prediksi/live-tracking-all', [DashboardController::class, 'getLiveTracking'])->name('prediksi.live-tracking-all');
     
     // ==================== PROFILE ====================
+    Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
     
     // ==================== USERS (MANAJEMEN USER) - ADMIN ONLY ====================
     Route::middleware(['admin'])->group(function () {

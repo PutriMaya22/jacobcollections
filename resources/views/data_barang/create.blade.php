@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Data Barang - JacobCollections')
+@section('title', 'Tambah Data Produk - JacobCollections')
 
 @section('content')
 <div class="bg-white rounded-lg shadow-sm p-6 max-w-2xl mx-auto">
     <div class="flex items-center gap-3 mb-6">
         <div class="text-2xl"></div>
-        <h2 class="text-xl font-semibold text-gray-800">Tambah Data Barang</h2>
+        <h2 class="text-xl font-semibold text-gray-800">Tambah Data Produk</h2>
     </div>
     
     @if(session('error'))
@@ -38,7 +38,7 @@
     
     <!-- Nama Barang -->
     <div class="mb-4">
-        <label class="block text-gray-700 mb-2 font-medium">Nama Barang <span class="text-red-500">*</span></label>
+        <label class="block text-gray-700 mb-2 font-medium">Nama Produk <span class="text-red-500">*</span></label>
         <input type="text" name="nama" value="{{ old('nama') }}" 
                class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500" required>
     </div>
@@ -114,7 +114,7 @@
             <label class="block text-gray-700 mb-2 font-medium">Stok <span class="text-red-500">*</span></label>
             <input type="number" name="stok" value="{{ old('stok') }}" 
                    class="w-full border rounded-lg px-4 py-2" required>
-            <p class="text-xs text-gray-500 mt-1">Jumlah stok barang yang tersedia</p>
+            <p class="text-xs text-gray-500 mt-1">Jumlah stok produk yang tersedia</p>
         </div>
     </div>
     

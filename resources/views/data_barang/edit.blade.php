@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Data Barang - JacobCollections')
+@section('title', 'Edit Data Produk - JacobCollections')
 
 @section('content')
 <div class="bg-white rounded-lg shadow-sm p-6 max-w-2xl mx-auto">
     <div class="flex items-center gap-3 mb-6">
         <div class="text-2xl"></div>
-        <h2 class="text-xl font-semibold text-gray-800">Edit Data Barang</h2>
+        <h2 class="text-xl font-semibold text-gray-800">Edit Data Produk</h2>
     </div>
     
     @if(session('error'))

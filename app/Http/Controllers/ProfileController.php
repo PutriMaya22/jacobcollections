@@ -6,8 +6,10 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -28,7 +30,6 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-
         $validated = $request->validated();
 
         // Handle delete profile picture flag
@@ -39,9 +40,8 @@ class ProfileController extends Controller
             $validated['profile_picture'] = null;
         }
 
-        // Handle file uploads
+        // Handle profile picture upload
         if ($request->hasFile('profile_picture')) {
-            // Delete old file if exists
             if (!empty($user->profile_picture) && Storage::disk('public')->exists($user->profile_picture)) {
                 Storage::disk('public')->delete($user->profile_picture);
             }
@@ -49,6 +49,7 @@ class ProfileController extends Controller
             $validated['profile_picture'] = $path;
         }
 
+        // Handle banner image upload
         if ($request->hasFile('banner_image')) {
             if (!empty($user->banner_image) && Storage::disk('public')->exists($user->banner_image)) {
                 Storage::disk('public')->delete($user->banner_image);
@@ -59,8 +60,8 @@ class ProfileController extends Controller
 
         $user->fill($validated);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
         $user->save();
@@ -69,18 +70,49 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Update the user's password.
      */
-    public function destroy(Request $request)
+    public function updatePassword(Request $request): RedirectResponse
     {
         $request->validate([
-        'password' => ['required', 'current_password'],
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', Password::min(8), 'confirmed'],
+        ], [
+            'current_password.required' => 'Password saat ini wajib diisi.',
+            'current_password.current_password' => 'Password saat ini tidak sesuai.',
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password baru minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak sesuai.',
+        ]);
+
+// Update password
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Logout user
+        Auth::logout();
+        
+        // Invalidate session
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect ke halaman login dengan pesan sukses
+        return redirect('/login')->with('status', 'Password berhasil diubah! Silakan login kembali dengan password baru Anda.');
+    }
+
+    /**
+     * Delete the user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
 
         Auth::logout();
-
         $user->delete();
 
         $request->session()->invalidate();

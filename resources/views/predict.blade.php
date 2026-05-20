@@ -23,7 +23,7 @@
     {{-- JUDUL --}}
     <div class="mb-6 pb-3 border-b border-gray-200">
         <h2 class="text-2xl font-semibold text-gray-800">Prediksi Penjualan</h2>
-        <p class="text-gray-500 text-sm mt-1">Prediksi penjualan berdasarkan historis data + Rekomendasi Restock Otomatis</p>
+        <p class="text-gray-500 text-sm mt-1">Prediksi penjualan berdasarkan historis data + Rekomendasi Restock </p>
     </div>
 
     {{-- ERROR MESSAGE --}}
@@ -173,78 +173,6 @@
                 @endif
             </div>
 
-            {{-- AKSI --}}
-            <div class="bg-white rounded-xl p-5 mb-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Aksi yang Harus Dilakukan</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @if($kategori == 'melonjak')
-                        <div class="bg-red-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-red-700">Strategi Agresif</p>
-                            <p class="text-xs text-gray-600 mt-1">Iklan massal & diskon besar</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-orange-700">Stok 2-3x Lipat</p>
-                            <p class="text-xs text-gray-600 mt-1">Produk CR >10%</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-purple-700">Flash Sale</p>
-                            <p class="text-xs text-gray-600 mt-1">Waktu terbatas</p>
-                        </div>
-                    @elseif($kategori == 'meningkat')
-                        <div class="bg-green-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-green-700">Optimasi Iklan</p>
-                            <p class="text-xs text-gray-600 mt-1">Targeting lebih tepat</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-blue-700">Tingkatkan Stok</p>
-                            <p class="text-xs text-gray-600 mt-1">Produk terlaris</p>
-                        </div>
-                        <div class="bg-yellow-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-yellow-700">Bundling Produk</p>
-                            <p class="text-xs text-gray-600 mt-1">Naikkan nilai transaksi</p>
-                        </div>
-                    @elseif($kategori == 'turun_drastis')
-                        <div class="bg-red-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-red-700">Evaluasi Total</p>
-                            <p class="text-xs text-gray-600 mt-1">Review seluruh strategi</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-orange-700">Promo Besar</p>
-                            <p class="text-xs text-gray-600 mt-1">Diskon 20-30%</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-purple-700">Survei Pelanggan</p>
-                            <p class="text-xs text-gray-600 mt-1">Cari penyebab penurunan</p>
-                        </div>
-                    @elseif($kategori == 'menurun')
-                        <div class="bg-yellow-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-yellow-700">Promo Menarik</p>
-                            <p class="text-xs text-gray-600 mt-1">Diskon & cashback</p>
-                        </div>
-                        <div class="bg-orange-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-orange-700">Restock Kritis</p>
-                            <p class="text-xs text-gray-600 mt-1">Prioritas CR tinggi</p>
-                        </div>
-                        <div class="bg-blue-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-blue-700">Optimasi Konversi</p>
-                            <p class="text-xs text-gray-600 mt-1">Foto & deskripsi</p>
-                        </div>
-                    @else
-                        <div class="bg-blue-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-blue-700">Monitor Berkala</p>
-                            <p class="text-xs text-gray-600 mt-1">Pantau performa rutin</p>
-                        </div>
-                        <div class="bg-green-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-green-700">Pertahankan Strategi</p>
-                            <p class="text-xs text-gray-600 mt-1">Strategi yang berjalan</p>
-                        </div>
-                        <div class="bg-purple-100 rounded-lg p-3 text-center hover:shadow-md transition">
-                            <p class="font-semibold text-purple-700">Optimasi Bertahap</p>
-                            <p class="text-xs text-gray-600 mt-1">A/B testing berkala</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
 
            {{-- 3 KOLOM: Produk Terlaris | Produk Diminati | Restock --}}
 @php
@@ -424,7 +352,7 @@
         @endif
     </div>
 
-   {{-- ==================== 3. RESTOCK PRODUK ==================== --}}
+  {{-- ==================== 3. RESTOCK PRODUK ==================== --}}
 <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-5 border-l-4 border-green-500 shadow-sm">
     <div class="mb-4">
         <h4 class="font-bold text-lg text-gray-800 flex items-center gap-2">
@@ -575,55 +503,142 @@
 
 </div>{{-- end grid 3 kolom --}}
 
-            {{-- KESIMPULAN --}}
-            <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="text-2xl">💡</div>
+          {{-- KESIMPULAN STRATEGI ACTIONABLE --}}
+
+    <div class="flex items-start gap-3">
+        <div class="text-2xl">💡</div>
+        <div class="flex-1">
+            <h4 class="font-bold text-purple-800 text-lg mb-1">Kesimpulan & Strategi </h4>
+            
+            @php
+                $totalProdukTerlaris = $produkTerlarisList->count();
+                $totalProdukDiminati = count($produk_paling_diminati);
+                $totalProdukKritis   = $rekomendasi_produk->where('prioritas', 1)->count();
+                $totalProdukPrioritas = $rekomendasi_produk->where('prioritas', '<=', 2)->count();
+                
+                // Ambil 3 produk terlaris
+                $top3Produk = $produkTerlarisList->take(3);
+                
+                // Ambil produk prioritas restock
+                $prioritasRestock = $rekomendasi_produk->where('prioritas', 1)->take(3);
+                
+                // Hitung total nilai restock
+                $totalRestock = $rekomendasi_produk->sum('jumlah_restock');
+                
+                // Tentukan target harian dari prediksi
+                $targetHarian = $prediksi ? ceil($prediksi / 30) : 0;
+                $targetMingguan = $prediksi ? ceil($prediksi / 4) : 0;
+                
+                // Ambil status dari session (sudah ada)
+                $statusSaatIni = $status ?? 'Stabil';
+            @endphp
+            
+            {{-- STATUS DAN PREDIKSI (Data dari hasil prediksi) --}}
+            <div class="bg-white/50 rounded-lg p-3 mb-3">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-semibold text-purple-700">Detail Prediksi:</span>
+                    <span class="text-xs font-bold px-2 py-1 rounded-full 
+                        @if($statusSaatIni == 'Melonjak') bg-green-100 text-green-700
+                        @elseif($statusSaatIni == 'Meningkat') bg-blue-100 text-blue-700
+                        @elseif($statusSaatIni == 'Menurun') bg-yellow-100 text-yellow-700
+                        @elseif($statusSaatIni == 'Turun Drastis') bg-red-100 text-red-700
+                        @else bg-gray-100 text-gray-700 @endif">
+                        {{ $statusSaatIni }}
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                        <h4 class="font-bold text-purple-800 text-lg mb-1">Kesimpulan Strategi</h4>
-                        @php
-                            $totalProdukTerlaris = $produkTerlarisList->count();
-                            $totalProdukDiminati = count($produkDiminatiList);
-                            $totalProdukKritis   = $produkRestockList->where('prioritas', 1)->count();
-                        @endphp
-                        @if($kategori == 'melonjak')
-                            <p class="text-sm text-purple-700">
-                                Untuk mencapai prediksi <strong>Rp {{ number_format($prediksi, 0, ',', '.') }}</strong> yang <strong>melonjak {{ number_format($persen_selisih, 1) }}%</strong>,
-                                diperlukan strategi agresif: fokus pada <strong>{{ $totalProdukTerlaris }} produk terlaris</strong> dengan stok 2-3x lipat,
-                                optimasi <strong>{{ $totalProdukDiminati }} produk diminati</strong>, dan restock darurat <strong>{{ $totalProdukKritis }} produk kritis</strong>.
-                            </p>
-                        @elseif($kategori == 'meningkat')
-                            <p class="text-sm text-purple-700">
-                                Untuk mencapai prediksi <strong>Rp {{ number_format($prediksi, 0, ',', '.') }}</strong> yang <strong>meningkat {{ number_format($persen_selisih, 1) }}%</strong>,
-                                fokus pada <strong>{{ $totalProdukTerlaris }} produk terlaris</strong>, optimasi <strong>{{ $totalProdukDiminati }} produk diminati</strong>,
-                                dan segera restock <strong>{{ $totalProdukKritis }} produk kritis</strong>.
-                            </p>
-                        @elseif($kategori == 'turun_drastis')
-                            <p class="text-sm text-purple-700">
-                                Prediksi <strong>Rp {{ number_format($prediksi, 0, ',', '.') }}</strong> <strong>turun drastis {{ number_format(abs($persen_selisih), 1) }}%</strong>.
-                                Perlu evaluasi menyeluruh, promo besar-besaran, restock produk CR tertinggi, dan survei pelanggan.
-                            </p>
-                        @elseif($kategori == 'menurun')
-                            <p class="text-sm text-purple-700">
-                                Untuk mengatasi prediksi <strong>Rp {{ number_format($prediksi, 0, ',', '.') }}</strong> yang <strong>turun {{ number_format(abs($persen_selisih), 1) }}%</strong>,
-                                tingkatkan promosi <strong>{{ $totalProdukTerlaris }} produk terlaris</strong>, optimasi konversi <strong>{{ $totalProdukDiminati }} produk diminati</strong>,
-                                dan restock segera <strong>{{ $totalProdukKritis }} produk kritis</strong>.
-                            </p>
-                        @else
-                            <p class="text-sm text-purple-700">
-                                Untuk mempertahankan prediksi <strong>Rp {{ number_format($prediksi, 0, ',', '.') }}</strong> yang stabil,
-                                pertahankan strategi <strong>{{ $totalProdukTerlaris }} produk terlaris</strong>, monitor <strong>{{ $totalProdukDiminati }} produk diminati</strong>,
-                                dan pastikan stok <strong>{{ $totalProdukKritis }} produk kritis</strong> tersedia.
-                            </p>
-                        @endif
+                        <span class="text-purple-600"> Total Pesanan</span>
+                        <span class="font-bold text-gray-800 block">{{ number_format($total_input ?? 0) }} pesanan</span>
+                    </div>
+                    <div>
+                        <span class="text-purple-600">Rata-rata Historis:</span>
+                        <span class="font-bold text-gray-800 block">Rp {{ number_format($rata_rata ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-purple-600">Prediksi Penjualan:</span>
+                        <span class="font-bold text-gray-800 block text-lg">Rp {{ number_format($prediksi ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-purple-600">Target Per Hari:</span>
+                        <span class="font-bold text-gray-800 block">Rp {{ number_format($targetHarian, 0, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
-
+            
+            {{-- RENCANA AKSI BERDASARKAN STATUS --}}
+            @if($statusSaatIni == 'Melonjak')
+                <div class="bg-green-50 rounded-lg p-2 mb-2">
+                    <p class="text-xs font-bold text-green-700 mb-1">STRATEGI AGGRESIF:</p>
+                    <ul class="text-xs text-green-700 space-y-1 list-disc list-inside">
+                        <li>Stok <strong>{{ $totalProdukTerlaris }} produk terlaris</strong> 2-3x lipat</li>
+                        <li>Restock darurat <strong>{{ $totalProdukKritis }} produk kritis</strong> dalam 24 jam</li>
+                        <li>Optimasi <strong>{{ $totalProdukDiminati }} produk diminati</strong> dengan bundling</li>
+                    </ul>
+                </div>
+                
+            @elseif($statusSaatIni == 'Meningkat')
+                <div class="bg-blue-50 rounded-lg p-2 mb-2">
+                    <p class="text-xs font-bold text-blue-700 mb-1">STRATEGI PERCEPATAN:</p>
+                    <ul class="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                        <li>Fokus promosi di <strong>{{ $totalProdukTerlaris }} produk terlaris</strong></li>
+                        <li>Restock <strong>{{ $totalProdukKritis }} produk prioritas</strong> (total {{ number_format($totalRestock) }} pcs)</li>
+                        <li>Target harian: <strong>Rp {{ number_format($targetHarian, 0, ',', '.') }}</strong></li>
+                    </ul>
+                </div>
+                
+            @elseif($statusSaatIni == 'Menurun')
+                <div class="bg-yellow-50 rounded-lg p-2 mb-2">
+                    <p class="text-xs font-bold text-yellow-700 mb-1">STRATEGI:</p>
+                    <ul class="text-xs text-yellow-700 space-y-1 list-disc list-inside">
+                        <li>Promo diskon 10-20% untuk <strong>{{ $totalProdukTerlaris }} produk terlaris</strong></li>
+                        <li>Restock segera <strong>{{ $totalProdukKritis }} produk kritis</strong></li>
+                        <li>Evaluasi <strong>{{ $totalProdukDiminati }} produk</strong> dengan konversi rendah</li>
+                    </ul>
+                </div>
+                
+            @elseif($statusSaatIni == 'Turun Drastis')
+                <div class="bg-red-50 rounded-lg p-2 mb-2">
+                    <p class="text-xs font-bold text-red-700 mb-1">TINDAKAN DARURAT:</p>
+                    <ul class="text-xs text-red-700 space-y-1 list-disc list-inside">
+                        <li>Diskon besar-besaran 30-50%</li>
+                        <li>Restock produk CR tertinggi</li>
+                        <li>Survei pelanggan untuk evaluasi</li>
+                    </ul>
+                </div>
+                
+            @else
+                <div class="bg-gray-50 rounded-lg p-2 mb-2">
+                    <p class="text-xs font-bold text-gray-700 mb-1">STRATEGI STABILISASI:</p>
+                    <ul class="text-xs text-gray-700 space-y-1 list-disc list-inside">
+                        <li>Pertahankan stok <strong>{{ $totalProdukTerlaris }} produk terlaris</strong></li>
+                        <li>Monitor <strong>{{ $totalProdukDiminati }} produk diminati</strong></li>
+                        <li>Pastikan stok <strong>{{ $totalProdukKritis }} produk kritis</strong> tersedia</li>
+                    </ul>
+                </div>
+            @endif
+            
+            {{-- PRODUK PRIORITAS RESTOCK --}}
+            @if($prioritasRestock->count() > 0)
+                <div class="mt-3 pt-2 border-t border-purple-200">
+                    <p class="text-xs font-bold text-purple-800"> PRIORITAS RESTOCK HARI INI:</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        @foreach($prioritasRestock as $produk)
+                            <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                                {{ $produk->nama_produk }} (stok: {{ $produk->stok }})
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
         </div>{{-- end rekomendasi terpadu --}}
     @endisset
+      
 
-    {{-- RIWAYAT PREDIKSI --}}
+   {{-- RIWAYAT PREDIKSI --}}
     @auth
         @if(isset($dataPrediksi) && $dataPrediksi->count() > 0)
             <div class="bg-white rounded-xl shadow-md p-6">
