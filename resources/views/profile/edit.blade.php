@@ -197,26 +197,6 @@ use Illuminate\Support\Facades\Storage;
                            placeholder="Confirm new password">
                 </div>
 
-                <!-- OTP Code -->
-                <div>
-                    <label for="otp_code" class="block text-sm font-medium text-gray-700 mb-2">OTP Code</label>
-                    <div class="flex gap-3">
-                        <input type="text" id="otp_code" name="otp_code" maxlength="4"
-                               class="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                               placeholder="1234">
-                        <button id="sendOtpButton" type="submit" form="sendOtpForm" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Kirim OTP</button>
-                    </div>
-                    @if (session('status') && session('open_tab') === 'password')
-                        <p class="mt-2 text-sm text-green-600">{{ session('status') }}</p>
-                    @endif
-                    @if (session('error') && session('open_tab') === 'password')
-                        <p class="mt-2 text-sm text-red-600">{{ session('error') }}</p>
-                    @endif
-                    @error('otp_code', 'updatePassword')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Save Button -->
                 <div class="flex justify-end pt-6">
                     <button type="submit" class="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all hover:-translate-y-0.5 shadow-lg">
