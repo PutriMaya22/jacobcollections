@@ -16,86 +16,88 @@ class PredictController extends Controller
     /**
      * Halaman Prediksi
      */
-    public function index()
-    {
-        // ==========================================
-        // HITUNG TARGET DARI DATA HISTORIS REAL
-        // ==========================================
-        
-        // Ambil 30 hari terakhir
-        $startDate = Carbon::now()->subDays(30);
-        
-        // 1. Total Pesanan Historis (dari tabel data_penjualan)
-        $totalPesananHistoris = DB::table('data_penjualan')
-            ->where('tanggal', '>=', $startDate)
-            ->sum('total_pesanan') ?: 100;
-        
-        // 2. Total Pendapatan Historis
-        $totalPendapatanHistoris = DB::table('data_penjualan')
-            ->where('tanggal', '>=', $startDate)
-            ->sum('total_penjualan') ?: 35000000;
-        
-        // 3. Rata-rata penjualan per pesanan
-        $rataPenjualanPerPesanan = $totalPesananHistoris > 0 
-            ? $totalPendapatanHistoris / $totalPesananHistoris 
-            : 350000;
-        
-        // 4. Total produk dilihat (dari data_barang)
-        $totalProdukDilihatHistoris = DB::table('data_barang')
-            ->sum('total_dilihat') ?: 800;
-        
-        // 5. Total pengunjung (dari total_klik di data_barang)
-        $totalPengunjungHistoris = DB::table('data_barang')
-            ->sum('total_klik') ?: 1200;
-        
-        // Target = historis × 1.2 (naik 20%)
-        $faktorTarget = 1.2;
-        $targetPesanan = ceil($totalPesananHistoris * $faktorTarget);
-        $targetPenjualanPerPesanan = ceil($rataPenjualanPerPesanan * $faktorTarget);
-        $targetProdukDilihat = ceil($totalProdukDilihatHistoris * $faktorTarget);
-        $targetPengunjung = ceil($totalPengunjungHistoris * $faktorTarget);
-        
-        // ==========================================
-        // AMBIL DATA LAINNYA
-        // ==========================================
-        
-        $dataPrediksi         = Prediksi::orderBy('tanggal', 'desc')->get();
-        $lastPrediction       = session('last_prediction', []);
-        $dataBarang           = $this->getDataBarang();
-        
-        // Ambil dari API Flask
-        $rekomendasiProduk    = $this->getRekomendasiRestockFromAPI(15);
-        
-        $produkPalingDiminati = $this->getPopularProductsFromDatabase(10);
-        $produkTerlaris       = $this->getProdukTerlaris();
+   public function index()
+{
+    // ==========================================
+    // HITUNG TARGET DARI DATA HISTORIS REAL
+    // ==========================================
+    
+    // Ambil 30 hari terakhir
+    $startDate = Carbon::now()->subDays(30);
+    
+    // 1. Total Pesanan Historis (dari tabel data_penjualan)
+    $totalPesananHistoris = DB::table('data_penjualan')
+        ->where('tanggal', '>=', $startDate)
+        ->sum('total_pesanan') ?: 100;
+    
+    // 2. Total Pendapatan Historis
+    $totalPendapatanHistoris = DB::table('data_penjualan')
+        ->where('tanggal', '>=', $startDate)
+        ->sum('total_penjualan') ?: 35000000;
+    
+    // 3. Rata-rata penjualan per pesanan
+    $rataPenjualanPerPesanan = $totalPesananHistoris > 0 
+        ? $totalPendapatanHistoris / $totalPesananHistoris 
+        : 350000;
+    
+    // 4. Total produk dilihat (dari data_barang)
+    $totalProdukDilihatHistoris = DB::table('data_barang')
+        ->sum('total_dilihat') ?: 800;
+    
+    // 5. Total pengunjung (dari total_klik di data_barang)
+    $totalPengunjungHistoris = DB::table('data_barang')
+        ->sum('total_klik') ?: 1200;
+    
+    // Target = historis × 1.2 (naik 20%)
+    $faktorTarget = 1.2;
+    $targetPesanan = ceil($totalPesananHistoris * $faktorTarget);
+    $targetPenjualanPerPesanan = ceil($rataPenjualanPerPesanan * $faktorTarget);
+    $targetProdukDilihat = ceil($totalProdukDilihatHistoris * $faktorTarget);
+    $targetPengunjung = ceil($totalPengunjungHistoris * $faktorTarget);
+    
+    // ==========================================
+    // AMBIL DATA LAINNYA
+    // ==========================================
+    
+    // 🔥 PERUBAHAN DI SINI: get() → paginate(10)
+    $dataPrediksi = Prediksi::orderBy('tanggal', 'desc')->paginate(50);  // ← 10 data per halaman
+    
+    $lastPrediction       = session('last_prediction', []);
+    $dataBarang           = $this->getDataBarang();
+    
+    // Ambil dari API Flask
+    $rekomendasiProduk    = $this->getRekomendasiRestockFromAPI(15);
+    
+    $produkPalingDiminati = $this->getPopularProductsFromDatabase(10);
+    $produkTerlaris       = $this->getProdukTerlaris();
 
-        \Log::info('rekomendasiProduk count: ' . $rekomendasiProduk->count());
-        
-        // Sinkronisasi data aktual
-        $this->sinkronisasiAktual();
-        
-        // ==========================================
-        // RETURN VIEW
-        // ==========================================
-        return view('predict', [
-            'dataPrediksi'              => $dataPrediksi,
-            'prediksi'                  => $lastPrediction['prediksi'] ?? null,
-            'tanggal_input'             => $lastPrediction['tanggal_input'] ?? null,
-            'total_input'               => $lastPrediction['total_input'] ?? null,
-            'rata_rata'                 => $lastPrediction['rata_rata'] ?? null,
-            'status'                    => $lastPrediction['status'] ?? null,
-            'strategi_umum'             => $lastPrediction['strategi_umum'] ?? null,
-            'rekomendasi_produk'        => $rekomendasiProduk,
-            'produk_paling_diminati'    => $produkPalingDiminati,
-            'produk_terlaris'           => $produkTerlaris,
-            'data_barang'               => $dataBarang,
-            // Target untuk kesimpulan
-            'targetPesanan'             => $targetPesanan,
-            'targetPenjualanPerPesanan' => $targetPenjualanPerPesanan,
-            'targetProdukDilihat'       => $targetProdukDilihat,
-            'targetPengunjung'          => $targetPengunjung,
-        ]);
-    }
+    \Log::info('rekomendasiProduk count: ' . $rekomendasiProduk->count());
+    
+    // Sinkronisasi data aktual
+    $this->sinkronisasiAktual();
+    
+    // ==========================================
+    // RETURN VIEW
+    // ==========================================
+    return view('predict', [
+        'dataPrediksi'              => $dataPrediksi,
+        'prediksi'                  => $lastPrediction['prediksi'] ?? null,
+        'tanggal_input'             => $lastPrediction['tanggal_input'] ?? null,
+        'total_input'               => $lastPrediction['total_input'] ?? null,
+        'rata_rata'                 => $lastPrediction['rata_rata'] ?? null,
+        'status'                    => $lastPrediction['status'] ?? null,
+        'strategi_umum'             => $lastPrediction['strategi_umum'] ?? null,
+        'rekomendasi_produk'        => $rekomendasiProduk,
+        'produk_paling_diminati'    => $produkPalingDiminati,
+        'produk_terlaris'           => $produkTerlaris,
+        'data_barang'               => $dataBarang,
+        // Target untuk kesimpulan
+        'targetPesanan'             => $targetPesanan,
+        'targetPenjualanPerPesanan' => $targetPenjualanPerPesanan,
+        'targetProdukDilihat'       => $targetProdukDilihat,
+        'targetPengunjung'          => $targetPengunjung,
+    ]);
+}
     /**
      * Ambil rekomendasi restock dari Flask API
      * Endpoint: GET /restock
