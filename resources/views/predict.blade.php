@@ -304,7 +304,7 @@
                                 {{ $loop->iteration }}
                             </span>
                             <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-gray-800 text-sm line-clamp-2">
+                                <div class="font-semibold text-gray-800 text-sm">
                                     {{ $produk->nama ?? $produk['nama'] ?? '-' }}
                                 </div>
                                 <div class="flex flex-wrap gap-4 mt-2 text-xs">
@@ -375,7 +375,7 @@
                             <tr class="border-b border-purple-100 hover:bg-purple-50 transition">
                                 <td class="py-3 px-2 font-semibold text-purple-600 text-center">{{ $loop->iteration }}</td>
                                 <td class="py-3 px-2 min-w-[180px]">
-                                    <div class="font-semibold text-gray-800 text-sm line-clamp-2">{{ $nama }}</div>
+                                    <div class="font-semibold text-gray-800 text-sm">{{ $nama }}</div>
                                     <div class="text-xs text-gray-400 mt-1 line-clamp-1">{{ $rekomendasi }}</div>
                                 </td>
                                 <td class="py-3 px-2 text-center">
@@ -485,7 +485,7 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between gap-2 flex-wrap">
                                 <div class="min-w-0 flex-1">
-                                    <div class="font-semibold text-gray-800 text-sm line-clamp-2">
+                                    <div class="font-semibold text-gray-800 text-sm">
                                         {{ $produk['nama_produk'] }}
                                     </div>
                                     <div class="text-xs text-gray-500 mt-1">

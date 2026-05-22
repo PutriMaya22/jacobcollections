@@ -918,7 +918,7 @@ def get_restock_rekomendasi():
             
             hasil.append({
                 "kode_produk": str(kode_produk),
-                "nama_produk": nama_produk[:60] if nama_produk else '-',
+                "nama_produk": nama_produk if nama_produk else '-',
                 "total_terjual": total_terjual,  # <-- INTEGER
                 "stok": stok,  # <-- INTEGER
                 "jumlah_restock": restock_recommended,  # <-- INTEGER
