@@ -15,10 +15,7 @@ use Illuminate\Support\Facades\Storage;
                  style="background: linear-gradient(90deg, #d6f2f2 0%, #eaf6ff 45%, #ffe5cf 100%);"
              @endif
              data-original-banner="{{ Auth::user()->banner_image && Storage::disk('public')->exists(Auth::user()->banner_image) ? asset('storage/' . Auth::user()->banner_image) : '' }}">
-            <!-- Camera Icon for Banner -->
-            <button id="bannerCameraBtn" type="button" class="absolute bottom-4 right-4 p-2 bg-white/80 border border-white rounded-lg hover:bg-white transition-all z-30 cursor-pointer focus:outline-none">
-                <i class="fas fa-camera text-gray-600"></i>
-            </button>
+
             <!-- Hidden file input for banner -->
             <input type="file" id="bannerInput" name="banner_image" accept="image/*" class="hidden">
             
@@ -87,17 +84,6 @@ use Illuminate\Support\Facades\Storage;
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                </div>
-
-                <!-- Profile Picture -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
-                    <div class="flex items-center gap-3">
-                        <button id="editProfileBtn" type="button" class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all">Upload New</button>
-                        <button id="deleteProfileBtn" type="button" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all">Remove</button>
-                    </div>
-                    <input type="file" id="profileInput" name="profile_picture" accept="image/*" class="hidden">
-                    <input type="hidden" id="deleteProfileFlag" name="delete_profile_picture" value="0">
                 </div>
 
                 <!-- Phone Number -->
